@@ -80,6 +80,7 @@ async def send_start_prompt(client):
                 responseMessage = await responses.handle_response(prompt)
                 if (config['discord_channel_id']):
                     channel = client.get_channel(int(config['discord_channel_id']))
+                    await channel.send('Online!')
                     await channel.send(responseMessage)
             logger.info(f"Starting prompt response:{responseMessage}")
         else:
@@ -135,7 +136,7 @@ def run_discord_bot():
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
-        await interaction.followup.send(":star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    `/public` ChatGPT switch to public mode \n    For complete documentation, please visit https://github.com/Zero6992/chatGPT-discord-bot")
+        await interaction.followup.send("This Bot is hosted by Bradly#7695 \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    `/public` ChatGPT switch to public mode \n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
 

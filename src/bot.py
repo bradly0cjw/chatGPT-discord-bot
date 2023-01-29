@@ -110,34 +110,52 @@ def run_discord_bot():
             f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
         await send_message(interaction, user_message)
 
-    @client.tree.command(name="private", description="Toggle private access")
+    @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
         global isPrivate
-        await interaction.response.defer(ephemeral=False)
-        if not isPrivate:
-            isPrivate = not isPrivate
-            logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
-            await interaction.followup.send("> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
+        if int(interaction.user.id) == int(config['discord_admin']):
+            await interaction.response.defer(ephemeral=False)
+            if not isPrivate:
+                isPrivate = not isPrivate
+                logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
+                logger.warning(interaction.user.id)
+                await interaction.followup.send("> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
+            else:
+                logger.info("You already on private mode!")
+                await interaction.followup.send("> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
         else:
-            logger.info("You already on private mode!")
-            await interaction.followup.send("> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
 
-    @client.tree.command(name="public", description="Toggle public access")
+    @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
         global isPrivate
-        await interaction.response.defer(ephemeral=False)
-        if isPrivate:
-            isPrivate = not isPrivate
-            await interaction.followup.send("> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
-            logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
+        if int(interaction.user.id) == int(config['discord_admin']):
+            await interaction.response.defer(ephemeral=False)
+            if isPrivate:
+                isPrivate = not isPrivate
+                await interaction.followup.send("> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
+                logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
+                logger.warning(interaction.user.id)
+            else:
+                await interaction.followup.send("> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
+                logger.info("You already on public mode!")
         else:
-            await interaction.followup.send("> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
-            logger.info("You already on public mode!")
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
-        await interaction.followup.send("This Bot is hosted by Bradly<@494796055439867905> \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    `/public` ChatGPT switch to public mode \n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
+        await interaction.followup.send("This Bot is hosted by Bradly<@494796055439867905> \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
 

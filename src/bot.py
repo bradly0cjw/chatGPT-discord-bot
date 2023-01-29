@@ -77,10 +77,11 @@ async def send_start_prompt(client):
             with open(prompt_path, "r") as f:
                 prompt = f.read()
                 logger.info(f"Send starting prompt with size {len(prompt)}")
-                responseMessage = await responses.handle_response(prompt)
+                # responseMessage = await responses.handle_response(prompt)
+                responseMessage = "Online!"
                 if (config['discord_channel_id']):
                     channel = client.get_channel(int(config['discord_channel_id']))
-                    await channel.send('Online!')
+                    # await channel.send('Online!')
                     await channel.send(responseMessage)
             logger.info(f"Starting prompt response:{responseMessage}")
         else:

@@ -106,9 +106,35 @@ def run_discord_bot():
         username = str(interaction.user)
         user_message = message
         channel = str(interaction.channel)
-        logger.info(
-            f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
         await send_message(interaction, user_message)
+        import os
+        # get config.json path
+        config_dir = os.path.abspath(__file__ + "/../../")
+        config_name2 = 'curusage.txt'
+        config_path2 = os.path.join(config_dir, config_name2)
+        with open(config_path2, "r") as file:
+        # Write some text to the file
+            cur=file.read()
+        cur=int(cur)    
+        await interaction.followup.send("You use %d Token this time"%cur)
+        logger.info(
+            f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
+
+    @client.tree.command(name="usege", description="Check current API usege")
+    async def cur_usege(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=False)
+        import os
+        # get config.json path
+        config_dir = os.path.abspath(__file__ + "/../../")
+        config_name = 'usage.txt'
+        config_path = os.path.join(config_dir, config_name)
+        with open(config_path, 'r') as file:
+            use=file.read()
+        use=int(use)
+        usepercent=use/900000
+        usecredit=use/1000*0.02
+        # print("Current Usage:%d/900000(%.2f%%)\nCurrent Credit:$%.2f/$18.00"%(use,usepercent,usecredit))
+        await interaction.followup.send("Current Usage: %d/900000 (%.2f%%)\nCurrent Credit: $%.2f/$18.00 (USD)"%(use,usepercent,usecredit))    
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):

@@ -120,7 +120,7 @@ def run_discord_bot():
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
 
-    @client.tree.command(name="usege", description="Check current API usege")
+    @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
         import os

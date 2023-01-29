@@ -116,7 +116,7 @@ def run_discord_bot():
         # Write some text to the file
             cur=file.read()
         cur=int(cur)    
-        await interaction.followup.send("You use %d Token this time"%cur)
+        await interaction.followup.send("You use %d Tokens this time"%cur)
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
 
@@ -131,10 +131,10 @@ def run_discord_bot():
         with open(config_path, 'r') as file:
             use=file.read()
         use=int(use)
-        usepercent=use/900000
+        usepercent=use/900000*100
         usecredit=use/1000*0.02
         # print("Current Usage:%d/900000(%.2f%%)\nCurrent Credit:$%.2f/$18.00"%(use,usepercent,usecredit))
-        await interaction.followup.send("Current Usage: %d/900000 (%.2f%%)\nCurrent Credit: $%.2f/$18.00 (USD)"%(use,usepercent,usecredit))    
+        await interaction.followup.send("Current Tokens: %d/900000 (%.2f%%)\nCurrent Credit: $%.2f/$18.00 (USD)"%(use,usepercent,usecredit))    
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):

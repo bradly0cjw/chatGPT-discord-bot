@@ -80,7 +80,7 @@ async def send_start_prompt(client):
                 # responseMessage = await responses.handle_response(prompt)
                 responseMessage = "Online!"
                 if (config['discord_channel_id']):
-                    channel = client.get_channel(int(config['discord_channel_id']))
+                    channel = client.get_channel(int(config['discord_log']))
                     # await channel.send('Online!')
                     await channel.send(responseMessage)
             logger.info(f"Starting prompt response:{responseMessage}")
@@ -119,6 +119,9 @@ def run_discord_bot():
         await interaction.followup.send("You use %d Tokens this time"%cur)
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
+        channel = client.get_channel(int(config['discord_log']))
+        guild=str(interaction.guild)
+        await channel.send("%s %s %d @%s %s"%(username,user_message,cur,guild,channel))
 
     @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):
@@ -134,7 +137,12 @@ def run_discord_bot():
         usepercent=use/900000*100
         usecredit=use/1000*0.02
         # print("Current Usage:%d/900000(%.2f%%)\nCurrent Credit:$%.2f/$18.00"%(use,usepercent,usecredit))
-        await interaction.followup.send("Current Tokens: %d/900000 (%.2f%%)\nCurrent Credit: $%.2f/$18.00 (USD)"%(use,usepercent,usecredit))    
+        await interaction.followup.send("Used Tokens: %d/900000 (%.2f%%)\nUsed Credit: $%.2f/$18.00 (USD)"%(use,usepercent,usecredit))    
+        username = str(interaction.user)
+        guild=str(interaction.guild)
+        sendchannel=str(interaction.channel)
+        channel = client.get_channel(int(config['discord_log']))
+        await channel.send("%s Usage @%s %s\nUsed Tokens: %d/900000 (%.2f%%)\nUsed Credit: $%.2f/$18.00 (USD)"%(username,guild,sendchannel,use,usepercent,usecredit))
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
@@ -156,6 +164,11 @@ def run_discord_bot():
             logger.warning(
             f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
             await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username = str(interaction.user)
+        guild=str(interaction.guild)
+        sendchannel=str(interaction.channel)
+        channel = client.get_channel(int(config['discord_log']))
+        await channel.send("%s Private @%s %s"%(username,guild,sendchannel))
 
     @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
@@ -177,6 +190,11 @@ def run_discord_bot():
             logger.warning(
             f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
             await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username = str(interaction.user)
+        guild=str(interaction.guild)
+        sendchannel=str(interaction.channel)
+        channel = client.get_channel(int(config['discord_log']))
+        await channel.send("%s Public @%s %s"%(username,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
@@ -184,6 +202,9 @@ def run_discord_bot():
         await interaction.followup.send("This Bot is hosted by Bradly<@494796055439867905> \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
+        username = str(interaction.user)
+        channel = client.get_channel(int(config['discord_log']))
+        await channel.send("%s help"%(username))
 
     TOKEN = config['discord_bot_token']
     client.run(TOKEN)

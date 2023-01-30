@@ -119,9 +119,9 @@ def run_discord_bot():
         await interaction.followup.send("You use %d Tokens this time"%cur)
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
-        channel = client.get_channel(int(config['discord_log']))
+        channel2 = client.get_channel(int(config['discord_log']))
         guild=str(interaction.guild)
-        await channel.send("%s %s %d @%s %s"%(username,user_message,cur,guild,channel))
+        await channel2.send("%s %s %d @%s#%s"%(username,user_message,cur,guild,channel))
 
     @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):
@@ -142,7 +142,7 @@ def run_discord_bot():
         guild=str(interaction.guild)
         sendchannel=str(interaction.channel)
         channel = client.get_channel(int(config['discord_log']))
-        await channel.send("%s Usage @%s %s\nUsed Tokens: %d/900000 (%.2f%%)\nUsed Credit: $%.2f/$18.00 (USD)"%(username,guild,sendchannel,use,usepercent,usecredit))
+        await channel.send("%s Usage @%s#%s\nUsed Tokens: %d/900000 (%.2f%%)\nUsed Credit: $%.2f/$18.00 (USD)"%(username,guild,sendchannel,use,usepercent,usecredit))
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
@@ -168,7 +168,7 @@ def run_discord_bot():
         guild=str(interaction.guild)
         sendchannel=str(interaction.channel)
         channel = client.get_channel(int(config['discord_log']))
-        await channel.send("%s Private @%s %s"%(username,guild,sendchannel))
+        await channel.send("%s Private @%s#%s"%(username,guild,sendchannel))
 
     @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
@@ -194,7 +194,7 @@ def run_discord_bot():
         guild=str(interaction.guild)
         sendchannel=str(interaction.channel)
         channel = client.get_channel(int(config['discord_log']))
-        await channel.send("%s Public @%s %s"%(username,guild,sendchannel))
+        await channel.send("%s Public @%s#%s"%(username,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
@@ -203,8 +203,10 @@ def run_discord_bot():
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
         username = str(interaction.user)
+        guild=str(interaction.guild)
+        sendchannel=str(interaction.channel)
         channel = client.get_channel(int(config['discord_log']))
-        await channel.send("%s help"%(username))
+        await channel.send("%s Help @%s#%s"%(username,guild,sendchannel))
 
     TOKEN = config['discord_bot_token']
     client.run(TOKEN)

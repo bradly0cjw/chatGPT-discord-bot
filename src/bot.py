@@ -117,21 +117,28 @@ def run_discord_bot():
         # get config.json path
         config_dir = os.path.abspath(__file__ + "/../../")
         config_name2 = 'curusage.txt'
+        config_name3 = 'model.txt'
         config_path2 = os.path.join(config_dir, config_name2)
+        config_path3 = os.path.join(config_dir, config_name3)
+        with open(config_path3, "r") as file:
+            model=file.read()
+        model=str(model)
         with open(config_path2, "r") as file:
-        # Write some text to the file
             cur=file.read()
-        cur=int(cur)    
-        await interaction.followup.send("You use %d Tokens this time"%cur)
+        cur=int(cur)
+        if model!="text-chat-davinci-002-20230126":    
+            await interaction.followup.send("You use %d Tokens this time"%cur)
+        else:
+            await interaction.followup.send("You use %d Tokens this time\nBut currently %s model is free to use"%(cur,model))
         logger.info(
-            f"\x1b[31m{username}\x1b[0m : '{user_message}' {cur} ({channel})")
+            f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
         channel2 = client.get_channel(int(config['discord_log']))
         guild=str(interaction.guild)
         # Get the current time
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel2.send("%s\n%s %s %d @%s#%s"%(time_string,username,user_message,cur,guild,channel))
+        await channel2.send("%s\n%s %s\nM:%s T:%d\n@%s#%s"%(time_string,username,user_message,model,cur,guild,channel))
 
     @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):

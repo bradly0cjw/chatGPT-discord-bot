@@ -66,6 +66,53 @@ async def send_message(message, user_message):
         await message.followup.send("> **Error: Something went wrong, please try again later!**")
         logger.exception(f"Error while sending message: {e}")
 
+async def send_message2(message, user_message):
+    await message.response.defer(ephemeral=isPrivate)
+    try:
+        response = '> **' + user_message + '** - <@' + \
+            str(message.user.id) + '>\n\n'
+        response = f"{response}{await responses.handle_response2(user_message)}"
+        if len(response) > 1900:
+            # Split the response into smaller chunks of no more than 1900 characters each(Discord limit is 2000 per chunk)
+            if "```" in response:
+                # Split the response if the code block exists
+                parts = response.split("```")
+                # Send the first message
+                await message.followup.send(parts[0])
+                # Send the code block in a seperate message
+                code_block = parts[1].split("\n")
+                formatted_code_block = ""
+                for line in code_block:
+                    while len(line) > 1900:
+                        # Split the line at the 50th character
+                        formatted_code_block += line[:1900] + "\n"
+                        line = line[1900:]
+                    formatted_code_block += line + "\n"  # Add the line and seperate with new line
+
+                # Send the code block in a separate message
+                if (len(formatted_code_block) > 2000):
+                    code_block_chunks = [formatted_code_block[i:i+1900]
+                                         for i in range(0, len(formatted_code_block), 1900)]
+                    for chunk in code_block_chunks:
+                        await message.followup.send("```" + chunk + "```")
+                else:
+                    await message.followup.send("```" + formatted_code_block + "```")
+
+                # Send the remaining of the response in another message
+
+                if len(parts) >= 3:
+                    await message.followup.send(parts[2])
+            else:
+                response_chunks = [response[i:i+1900]
+                                   for i in range(0, len(response), 1900)]
+                for chunk in response_chunks:
+                    await message.followup.send(chunk)
+        else:
+            await message.followup.send(response)
+    except Exception as e:
+        await message.followup.send("> **Error: Something went wrong, please try again later!**")
+        logger.exception(f"Error while sending message: {e}")
+
 
 async def send_start_prompt(client):
     import os
@@ -113,6 +160,42 @@ def run_discord_bot():
         user_message = message
         channel = str(interaction.channel)
         await send_message(interaction, user_message)
+        import os
+        # get config.json path
+        config_dir = os.path.abspath(__file__ + "/../../")
+        config_name2 = 'curusage.txt'
+        config_name3 = 'model.txt'
+        config_path2 = os.path.join(config_dir, config_name2)
+        config_path3 = os.path.join(config_dir, config_name3)
+        with open(config_path3, "r") as file:
+            model=file.read()
+        model=str(model)
+        with open(config_path2, "r") as file:
+            cur=file.read()
+        cur=int(cur)
+        if model!="text-chat-davinci-002-20230126":    
+            await interaction.followup.send("You use `%d` Tokens this time"%cur)
+        else:
+            # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
+            pass
+        logger.info(
+            f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
+        channel2 = client.get_channel(int(config['discord_log']))
+        guild=str(interaction.guild)
+        # Get the current time
+        now = datetime.now()
+        # Format the current time as a string
+        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
+        await channel2.send("> `%s`> \n%s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,channel))
+
+    @client.tree.command(name="chat2", description="Have a chat with GPT-3 (Count in credit)")
+    async def chat2(interaction: discord.Interaction, *, message: str):
+        if interaction.user == client.user:
+            return
+        username = str(interaction.user)
+        user_message = message
+        channel = str(interaction.channel)
+        await send_message2(interaction, user_message)
         import os
         # get config.json path
         config_dir = os.path.abspath(__file__ + "/../../")

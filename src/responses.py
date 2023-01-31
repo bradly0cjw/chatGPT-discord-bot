@@ -58,7 +58,7 @@ async def handle_response(message) -> str:
         frequency_penalty=0.0,
         presence_penalty=0.0,
     )
-    print(response)
+    # print(response)
     oresponseMessage = response.choices[0].text
     responseMessage=oresponseMessage.replace("<|im_end|>","")
     nowusage=response.usage.total_tokens

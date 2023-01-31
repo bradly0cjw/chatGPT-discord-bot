@@ -198,7 +198,7 @@ def run_discord_bot():
         await client.tree.sync()
         logger.info(f'{client.user} is now running!')
 
-    @client.tree.command(name="chat", description="Have a chat with ChatGPT (Currently Free but limit access)")
+    @client.tree.command(name="chat", description="Have a chat with ChatGPT (With OpenAi Preset prompt)")
     async def chat(interaction: discord.Interaction, *, message: str):
         if interaction.user == client.user:
             return
@@ -234,7 +234,7 @@ def run_discord_bot():
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
         await channel2.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,channel))
 
-    @client.tree.command(name="chat2", description="Have a chat with GPT-3 (Count in credit)")
+    @client.tree.command(name="chat2", description="Have a chat with ChatGPT (With no prompt)")
     async def chat2(interaction: discord.Interaction, *, message: str):
         if interaction.user == client.user:
             return
@@ -332,7 +332,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Usage\n> @%s#%s\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
+        await channel.send("> `%s`\n> %s Usage\n> @`%s#%s`\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):

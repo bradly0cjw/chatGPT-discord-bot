@@ -51,7 +51,7 @@ async def handle_response(message) -> str:
         # model="text-curie-001",
         # model="code-davinci-002",
         # prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Don't be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short\n User: %s \n\n ChatGPT:"%message,
-        prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do have many items. Keep the number of items long\n User: %s \n\n ChatGPT:"%message,
+        prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do have many items. Keep the number of items long\n %s"%message,
         # prompt=message,
         temperature=0.9,
         max_tokens=2048,
@@ -69,11 +69,11 @@ async def handle_response(message) -> str:
 
 async def handle_response2(message) -> str:
     response = await sync_to_async(openai.Completion.create)(
-        # model="text-chat-davinci-002-20230126",        
-        model="text-davinci-003",
+        model="text-chat-davinci-002-20230126",        
+        # model="text-davinci-003",
         # model="text-curie-001",
         # model="code-davinci-002",
-        # prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Don't be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do not have too many items. \n User: %s \n\n ChatGPT:"%message,
+        # prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Don't be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do not have too many items.Keep the number of items Short\n %s"%message,
         prompt=message,
         temperature=0.7,
         max_tokens=2048,
@@ -95,7 +95,7 @@ async def handle_response3(message) -> str:
         # model="text-davinci-003",
         # model="text-curie-001",
         # model="code-davinci-002",
-        prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do have many items. Keep the number of items long\n User: %s \n\n ChatGPT:"%message,
+        # prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do have many items. Keep the number of items long\n User: %s \n\n ChatGPT:"%message,
         prompt=message,
         temperature=0.9,
         max_tokens=2048,

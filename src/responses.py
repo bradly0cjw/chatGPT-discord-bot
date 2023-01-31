@@ -40,6 +40,7 @@ def write(token):
 
 async def handle_response(message) -> str:
     response = await sync_to_async(openai.Completion.create)(
+        # model="text-chat-davinci-002-20230126",        
         model="text-davinci-003",
         # model="text-curie-001",
         # model="code-davinci-002",

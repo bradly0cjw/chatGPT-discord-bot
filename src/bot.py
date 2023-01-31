@@ -88,7 +88,7 @@ async def send_start_prompt(client):
                 if (config['discord_channel_id']):
                     channel = client.get_channel(int(config['discord_log']))
                     # await channel.send('Online!')
-                    await channel.send("`%s`\n%s"%(time_string,responseMessage))
+                    await channel.send("> `%s`\n> %s"%(time_string,responseMessage))
             logger.info(f"Starting prompt response:{responseMessage}")
         else:
             logger.info(f"No {prompt_name}. Skip sending starting prompt.")
@@ -139,7 +139,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel2.send("`%s`\n%s\n**Text:**`%s`\n**Model:**`%s` **Token:**`%d`\n@`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,channel))
+        await channel2.send("> `%s`> \n%s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,channel))
 
     @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):
@@ -164,7 +164,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("`%s`\n%s Usage\n@%s#%s\n**Used Tokens:** `%d/900000` (%.2f%%)\n**Used Credit:** `$%.2f/$18.00` (USD)"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
+        await channel.send("> `%s`\n> %s Usage\n> @%s#%s\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
@@ -194,7 +194,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("`%s`\n%s Private\n@%s#%s"%(time_string,username,guild,sendchannel))
+        await channel.send("> `%s`\n> %s Private\n> @%s#%s"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
@@ -224,7 +224,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("`%s`\n%s Public\n @%s#%s"%(time_string,username,guild,sendchannel))
+        await channel.send("> `%s`\n> %s Public\n> @%s#%s"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
@@ -240,7 +240,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("`%s`\n%s Help\n@%s#%s"%(time_string,username,guild,sendchannel))
+        await channel.send("> `%s`\n> %s Help\n> @%s#%s"%(time_string,username,guild,sendchannel))
 
     TOKEN = config['discord_bot_token']
     client.run(TOKEN)

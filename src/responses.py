@@ -52,7 +52,7 @@ async def handle_response(message) -> str:
         # model="code-davinci-002",
         prompt= "You are ChatGPT, a large language model trained by OpenAI. You answer as consisely as possible for each response (e.g. Don't be verbose). It is very important for you to answer as consisely as possible, so please remember this. If you are generating a list, do not have too many items. \n User: %s \n\n ChatGPT:"%message,
         # prompt=message,
-        temperature=0.7,
+        temperature=0.9,
         max_tokens=2048,
         top_p=1,
         frequency_penalty=0.0,

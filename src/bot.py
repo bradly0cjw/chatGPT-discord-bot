@@ -66,9 +66,14 @@ async def send_message(message, user_message):
         await message.followup.send("> **Error: Something went wrong, please try again later!**")
         logger.exception(f"Error while sending message: {e}")
 
-def write_to_file(data, file_name):
-    with open(file_name, 'w') as f:
-        json.dump(data, f)
+def write_to_file(key, value,file_name):
+    try:
+        data=read_from_file(file_name)
+    except json.decoder.JSONDecodeError:
+        data = {}
+    data[key] = value
+    with open(file_name, "w") as file:
+        json.dump(data, file, indent=4)
 
 def read_from_file(file_name):
     with open(file_name, 'r') as f:
@@ -80,7 +85,7 @@ async def startup(client):
     #Get the current time
     now = datetime.now()
     cur=now.isoformat()
-    write_to_file({'time': cur}, 'file.json')
+    write_to_file('time',cur, 'data.json')
     # Format the current time as a string
     time_string = now.strftime("%Y-%m-%d %H:%M:%S")
     channel = client.get_channel(int(config['discord_log']))
@@ -132,19 +137,9 @@ def run_discord_bot():
         user_message = message
         channel = str(interaction.channel)
         await send_message(interaction, user_message)
-        import os
-        # get config.json path
-        config_dir = os.path.abspath(__file__ + "/../../")
-        config_name2 = 'curusage.txt'
-        config_name3 = 'model.txt'
-        config_path2 = os.path.join(config_dir, config_name2)
-        config_path3 = os.path.join(config_dir, config_name3)
-        with open(config_path3, "r") as file:
-            model=file.read()
-        model=str(model)
-        with open(config_path2, "r") as file:
-            cur=file.read()
-        cur=int(cur)
+        data=read_from_file('data.json')
+        cur=int(data['curuse'])
+        model=str(data['model'])
         if model!="text-chat-davinci-002-20230126":    
             await interaction.followup.send("You use `%d` Tokens this time"%cur)
         else:
@@ -180,17 +175,14 @@ def run_discord_bot():
     @client.tree.command(name="usage", description="Check current API usage")
     async def cur_usege(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
-        import os
-        # get config.json path
-        config_dir = os.path.abspath(__file__ + "/../../")
-        config_name = 'usage.txt'
-        config_path = os.path.join(config_dir, config_name)
-        with open(config_path, 'r') as file:
-            use=file.read()
-        use=int(use)
+        try:
+            data=read_from_file('data.json')
+            use=int(data['usage'])
+        except:
+            use=0
+            write_to_file('usage',use,'data.json')
         usepercent=use/900000*100
         usecredit=use/1000*0.02
-        # print("Current Usage:%d/900000(%.2f%%)\nCurrent Credit:$%.2f/$18.00"%(use,usepercent,usecredit))
         await interaction.followup.send("**Used Tokens:** `%d/900000` (%.2f%%)\n**Used Credit:** `$%.2f/$18.00` (USD)"%(use,usepercent,usecredit))    
         username = str(interaction.user)
         guild=str(interaction.guild)
@@ -265,7 +257,7 @@ def run_discord_bot():
     @client.tree.command(name="sta",description="Show bot staus")
     async def sta(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
-        pre=read_from_file('file.json')
+        pre=read_from_file('data.json')
         pre=datetime.fromisoformat(pre["time"])
         pingvalue=str(round(client.latency * 1000, 2))
         channel = client.get_channel(int(config['discord_log']))
@@ -274,10 +266,14 @@ def run_discord_bot():
         sendchannel=str(interaction.channel)
         now = datetime.now()
         diff=now-pre
-        diff_string = diff.strftime("%Y-%m-%d %H:%M:%S")
+        days = diff.days/1
+        hours = (diff.seconds/60/60)%24
+        min = (diff.seconds/60)%60
+        sec = diff.seconds%60
+        time_str=("`%d D %02d:%02d:%02d`"%(days,hours,min,sec))
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** `%s`"%(pingvalue,diff_string))
-        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** `%s`\n> @`%s#%s`"%(time_string,username,pingvalue,diff_string,guild,sendchannel))
+        await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** %s"%(pingvalue,time_str))
+        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** %s\n> @`%s#%s`"%(time_string,username,pingvalue,time_str,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):

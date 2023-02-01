@@ -21,29 +21,20 @@ config = get_config()
 chatbot = Chatbot(api_key=config['openAI_key'])
 
 def write(token,model):
+    from .bot import write_to_file,read_from_file
     import os
     # get config.json path
-    config_dir = os.path.abspath(__file__ + "/../../")
-    config_name = 'usage.txt'
-    config_name2 = 'curusage.txt'
-    config_name3 = 'model.txt'
-    config_path = os.path.join(config_dir, config_name)
-    config_path2 = os.path.join(config_dir, config_name2)
-    config_path3 = os.path.join(config_dir, config_name3)
-    with open(config_path2, "w") as file:
-        # Write some text to the file
-        file.write(str(token))
-    with open(config_path, 'r') as file:
-        use=file.read()
-    with open(config_path3, "w") as file:
-        # Write some text to the file
-        file.write(str(model))
+    write_to_file('curuse',int(token),'data.json')
+    data=read_from_file('data.json')
+    try:
+        use=data['usage']
+    except:
+        use=0
+        write_to_file('usage',use,'data.json')
+    write_to_file('model',str(model),'data.json')
     if model!="text-chat-davinci-002-20230126":  
         use=int(use)+int(token)
-    # print(use)
-    with open(config_path, "w") as file:
-        # Write some text to the file
-        file.write(str(use))
+    write_to_file('usage',use,'data.json')
 
 async def handle_response(message) -> str:
     response = await sync_to_async(chatbot.ask)(message)

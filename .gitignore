@@ -1,4 +1,8 @@
 config.json
+*usage.txt
+file.json
+test.py
+model.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

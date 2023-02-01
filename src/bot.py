@@ -239,10 +239,7 @@ def run_discord_bot():
         pre=read_from_file('data.json')
         pre=datetime.fromisoformat(pre["time"])
         pingvalue=str(round(client.latency * 1000, 2))
-        channel = client.get_channel(int(config['discord_log']))
-        username = str(interaction.user)
-        guild=str(interaction.guild)
-        sendchannel=str(interaction.channel)
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
         now = datetime.now()
         diff=now-pre
         days = diff.days/1
@@ -250,7 +247,6 @@ def run_discord_bot():
         min = (diff.seconds/60)%60
         sec = diff.seconds%60
         time_str=("`%d D %02d:%02d:%02d`"%(days,hours,min,sec))
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
         await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** %s"%(pingvalue,time_str))
         await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** %s\n> @`%s#%s`\n"%(time_string,username,pingvalue,time_str,guild,sendchannel))
 

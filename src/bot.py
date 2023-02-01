@@ -3,7 +3,7 @@ from discord import app_commands
 from src import responses
 from src import log
 from datetime import datetime
-
+import json
 
 logger = log.setup_logger(__name__)
 
@@ -66,10 +66,21 @@ async def send_message(message, user_message):
         await message.followup.send("> **Error: Something went wrong, please try again later!**")
         logger.exception(f"Error while sending message: {e}")
 
+def write_to_file(data, file_name):
+    with open(file_name, 'w') as f:
+        json.dump(data, f)
+
+def read_from_file(file_name):
+    with open(file_name, 'r') as f:
+        data=json.load(f)
+        return data
+
 async def startup(client):
     responseMessage = "Online!"
     #Get the current time
     now = datetime.now()
+    cur=now.isoformat()
+    write_to_file({'time': cur}, 'file.json')
     # Format the current time as a string
     time_string = now.strftime("%Y-%m-%d %H:%M:%S")
     channel = client.get_channel(int(config['discord_log']))
@@ -251,18 +262,22 @@ def run_discord_bot():
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
         await channel.send("> `%s`\n> %s Public\n> @`%s#%s`"%(time_string,username,guild,sendchannel))
 
-    @client.tree.command(name="ping",description="Measure delays")
-    async def ping(interaction: discord.Interaction):
+    @client.tree.command(name="sta",description="Show bot staus")
+    async def sta(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
+        pre=read_from_file('file.json')
+        pre=datetime.fromisoformat(pre["time"])
         pingvalue=str(round(client.latency * 1000, 2))
-        await interaction.followup.send("Pong!~ %s ms"%pingvalue)
         channel = client.get_channel(int(config['discord_log']))
         username = str(interaction.user)
         guild=str(interaction.guild)
         sendchannel=str(interaction.channel)
         now = datetime.now()
+        diff=now-pre
+        diff_string = diff.strftime("%Y-%m-%d %H:%M:%S")
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> @`%s#%s`"%(time_string,username,pingvalue,guild,sendchannel))
+        await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** `%s`"%(pingvalue,diff_string))
+        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** `%s`\n> @`%s#%s`"%(time_string,username,pingvalue,diff_string,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):

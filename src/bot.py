@@ -79,6 +79,9 @@ def read_from_file(file_name):
     with open(file_name, 'r') as f:
         data=json.load(f)
         return data
+        
+def logging(client,interaction):
+    return str(interaction.user),str(interaction.guild),str(interaction.channel),client.get_channel(int(config['discord_log'])),datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 async def startup(client):
     responseMessage = "Online!"
@@ -90,7 +93,7 @@ async def startup(client):
     time_string = now.strftime("%Y-%m-%d %H:%M:%S")
     channel = client.get_channel(int(config['discord_log']))
     # await channel.send('Online!')
-    await channel.send("> `%s`\n> %s Connected to `%s` servers\n> **Ping:**`%s`"%(time_string,responseMessage,len(client.guilds),str(round(client.latency * 1000, 2))))
+    await channel.send("> `%s`\n> %s Connected to `%s` servers\n> **Ping:**`%s`\n"%(time_string,responseMessage,len(client.guilds),str(round(client.latency * 1000, 2))))
     # print(client.guilds)
 
 
@@ -147,13 +150,8 @@ def run_discord_bot():
             pass
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
-        channel2 = client.get_channel(int(config['discord_log']))
-        guild=str(interaction.guild)
-        # Get the current time
-        now = datetime.now()
-        # Format the current time as a string
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel2.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,channel))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
 
     
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
@@ -163,6 +161,8 @@ def run_discord_bot():
         await interaction.followup.send("> **Info: I have forgotten everything.**")
         logger.warning(
             "\x1b[31mChatGPT bot has been successfully reset\x1b[0m")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s **Reset**\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
         await send_start_prompt(client)
     
     @client.tree.command(name="dbug", description="debug only (need permission)")
@@ -184,15 +184,8 @@ def run_discord_bot():
         usepercent=use/900000*100
         usecredit=use/1000*0.02
         await interaction.followup.send("**Used Tokens:** `%d/900000` (%.2f%%)\n**Used Credit:** `$%.2f/$18.00` (USD)"%(use,usepercent,usecredit))    
-        username = str(interaction.user)
-        guild=str(interaction.guild)
-        sendchannel=str(interaction.channel)
-        channel = client.get_channel(int(config['discord_log']))
-        # Get the current time
-        now = datetime.now()
-        # Format the current time as a string
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Usage\n> @`%s#%s`\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Usage\n> @`%s#%s`\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)\n"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
@@ -214,15 +207,8 @@ def run_discord_bot():
             logger.warning(
             f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
             await interaction.followup.send("> **Warn: You don't have Permission ! **")
-        username = str(interaction.user)
-        guild=str(interaction.guild)
-        sendchannel=str(interaction.channel)
-        channel = client.get_channel(int(config['discord_log']))
-        # Get the current time
-        now = datetime.now()
-        # Format the current time as a string
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`"%(time_string,username,guild,sendchannel))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
@@ -244,15 +230,8 @@ def run_discord_bot():
             logger.warning(
             f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
             await interaction.followup.send("> **Warn: You don't have Permission ! **")
-        username = str(interaction.user)
-        guild=str(interaction.guild)
-        sendchannel=str(interaction.channel)
-        channel = client.get_channel(int(config['discord_log']))
-        # Get the current time
-        now = datetime.now()
-        # Format the current time as a string
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`"%(time_string,username,guild,sendchannel))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="sta",description="Show bot staus")
     async def sta(interaction: discord.Interaction):
@@ -273,7 +252,7 @@ def run_discord_bot():
         time_str=("`%d D %02d:%02d:%02d`"%(days,hours,min,sec))
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
         await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** %s"%(pingvalue,time_str))
-        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** %s\n> @`%s#%s`"%(time_string,username,pingvalue,time_str,guild,sendchannel))
+        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** %s\n> @`%s#%s`\n"%(time_string,username,pingvalue,time_str,guild,sendchannel))
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
@@ -281,15 +260,8 @@ def run_discord_bot():
         await interaction.followup.send("This Bot is hosted by Bradly<@494796055439867905> \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
-        username = str(interaction.user)
-        guild=str(interaction.guild)
-        sendchannel=str(interaction.channel)
-        channel = client.get_channel(int(config['discord_log']))
-        # Get the current time
-        now = datetime.now()
-        # Format the current time as a string
-        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Help\n> @%s#%s"%(time_string,username,guild,sendchannel))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Help\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
     TOKEN = config['discord_bot_token']
     client.run(TOKEN)

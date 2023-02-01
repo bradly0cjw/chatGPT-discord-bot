@@ -66,6 +66,18 @@ async def send_message(message, user_message):
         await message.followup.send("> **Error: Something went wrong, please try again later!**")
         logger.exception(f"Error while sending message: {e}")
 
+async def startup(client):
+    responseMessage = "Online!"
+    #Get the current time
+    now = datetime.now()
+    # Format the current time as a string
+    time_string = now.strftime("%Y-%m-%d %H:%M:%S")
+    channel = client.get_channel(int(config['discord_log']))
+    # await channel.send('Online!')
+    await channel.send("> `%s`\n> %s Connected to `%s` servers\n> **Ping:**`%s`"%(time_string,responseMessage,len(client.guilds),str(round(client.latency * 1000, 2))))
+    # print(client.guilds)
+
+
 async def send_start_prompt(client):
     import os
     import os.path
@@ -78,18 +90,13 @@ async def send_start_prompt(client):
             with open(prompt_path, "r") as f:
                 prompt = f.read()
                 logger.info(f"Send starting prompt with size {len(prompt)}")
-                # responseMessage = await responses.handle_response(prompt)
-                responseMessage = "Online!"
-                # Get the current time
-                now = datetime.now()
-                # Format the current time as a string
-                time_string = now.strftime("%Y-%m-%d %H:%M:%S")
                 if (config['discord_channel_id']):
-                    channel = client.get_channel(int(config['discord_log']))
-                    # await channel.send('Online!')
-                    await channel.send("> `%s`\n> %s Connected to %s servers"%(time_string,responseMessage,len(client.guilds)))
-                    # print(client.guilds)
-            logger.info(f"Starting prompt response:{responseMessage}")
+                    responseMessage = await responses.handle_response(prompt)
+                    channel = client.get_channel(int(config['discord_channel_id']))
+                    await channel.send(responseMessage)
+                    logger.info(f"Starting prompt response:{responseMessage}")
+                else:
+                    logger.info(f"No Channel selected. Skip sending starting prompt.")
         else:
             logger.info(f"No {prompt_name}. Skip sending starting prompt.")
     except Exception as e:
@@ -101,6 +108,7 @@ def run_discord_bot():
 
     @client.event
     async def on_ready():
+        await startup(client)
         await send_start_prompt(client)
         await client.tree.sync()
         logger.info(f'{client.user} is now running!')
@@ -211,7 +219,7 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Private\n> @%s#%s"%(time_string,username,guild,sendchannel))
+        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
@@ -241,17 +249,21 @@ def run_discord_bot():
         now = datetime.now()
         # Format the current time as a string
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        await channel.send("> `%s`\n> %s Public\n> @%s#%s"%(time_string,username,guild,sendchannel))
+        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`"%(time_string,username,guild,sendchannel))
 
-    @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
-    async def reset(interaction: discord.Interaction):
-        responses.chatbot.reset()
+    @client.tree.command(name="ping",description="Measure delays")
+    async def ping(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
-        await interaction.followup.send("> **Info: I have forgotten everything.**")
-        logger.warning(
-            "\x1b[31mChatGPT bot has been successfully reset\x1b[0m")
-        await send_start_prompt(client)
-        
+        pingvalue=str(round(client.latency * 1000, 2))
+        await interaction.followup.send("Pong!~ %s ms"%pingvalue)
+        channel = client.get_channel(int(config['discord_log']))
+        username = str(interaction.user)
+        guild=str(interaction.guild)
+        sendchannel=str(interaction.channel)
+        now = datetime.now()
+        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
+        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> @`%s#%s`"%(time_string,username,pingvalue,guild,sendchannel))
+
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)

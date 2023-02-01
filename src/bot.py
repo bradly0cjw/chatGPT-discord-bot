@@ -243,6 +243,15 @@ def run_discord_bot():
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
         await channel.send("> `%s`\n> %s Public\n> @%s#%s"%(time_string,username,guild,sendchannel))
 
+    @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
+    async def reset(interaction: discord.Interaction):
+        responses.chatbot.reset()
+        await interaction.response.defer(ephemeral=False)
+        await interaction.followup.send("> **Info: I have forgotten everything.**")
+        logger.warning(
+            "\x1b[31mChatGPT bot has been successfully reset\x1b[0m")
+        await send_start_prompt(client)
+        
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)

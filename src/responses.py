@@ -1,6 +1,5 @@
 from revChatGPT.Official import Chatbot
 import json
-import json
 from asgiref.sync import sync_to_async
 import requests
 
@@ -16,6 +15,7 @@ def get_config() -> dict:
         config = json.load(f)
 
     return config
+
 
 config = get_config()
 chatbot = Chatbot(api_key=config['openAI_key'])

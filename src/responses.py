@@ -1,4 +1,4 @@
-from revChatGPT.Official import Chatbot
+from revChatGPT.Official import Chatbot,Prompt
 import json
 from asgiref.sync import sync_to_async
 import requests
@@ -22,7 +22,6 @@ chatbot = Chatbot(api_key=config['openAI_key'])
 
 def write(token,model):
     from .bot import write_to_file,read_from_file
-    import os
     # get config.json path
     write_to_file('curuse',int(token),'data.json')
     data=read_from_file('data.json')

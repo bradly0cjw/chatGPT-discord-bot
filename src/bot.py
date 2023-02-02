@@ -166,8 +166,19 @@ def run_discord_bot():
         await send_start_prompt(client)
     
     @client.tree.command(name="dbug", description="debug only (need permission)")
-    async def chat(interaction: discord.Interaction, *, message: str):
+    async def chat(interaction: discord.Interaction):
         if int(interaction.user.id) == int(config['discord_admin']):
+            responses.chatbot.save_conversation(str(interaction.user.id))
+            print(responses.chatbot.get_conversations())
+            responses.chatbot.dump_conversation_history()
+            await interaction.response.defer(ephemeral=True)
+            a=responses.chatbot.prompt.chat_history
+            try:
+                print(a)
+            except:
+                print("error")
+                pass
+            await interaction.followup.send(a)
             return
         else:
             return

@@ -139,11 +139,43 @@ def run_discord_bot():
         username = str(interaction.user)
         user_message = message
         channel = str(interaction.channel)
-        await send_message(interaction, user_message)
+        # responses.chatbot.reset()
+        # try:
+        #     # responses.chatbot.prompt.chat_history=[]
+        #     responses.chatbot.load_conversation(str(interaction.user.id))
+        #     a=responses.chatbot.conversations[str(interaction.user.id)].chat_history
+        #     b=responses.chatbot.conversations["849950082714435624"].chat_history
+        #     c=responses.chatbot.conversations["494796055439867905"].chat_history
+        #     print("get %s ,%s"%(interaction.user.id,a))
+        #     print("get %s ,%s"%("Yee",c))
+        #     print("get %s ,%s"%("lin",b))
+
+        # except:
+        #     # responses.chatbot.prompt.chat_history=[]
+        #     print("err")
+        #     pass
+        
+        # print("current: %s"%responses.chatbot.prompt.chat_history)
+
+        # await send_message(interaction, user_message)
+        await interaction.response.defer(ephemeral=True)
+        await interaction.followup.send("現在Chat Gpt 的Api被肏爛了\n請等待修復")
+
+        # responses.chatbot.save_conversation(str(interaction.user.id))
+        # a=responses.chatbot.prompt.chat_history
+        # try:
+        #     print(a)
+        #     b=responses.chatbot.conversations["849950082714435624"].chat_history
+        #     c=responses.chatbot.conversations["494796055439867905"].chat_history
+        #     print("get %s ,%s"%("Yee",c))
+        #     print("get %s ,%s"%("lin",b))
+        # except:
+        #     print("error")
+        # responses.chatbot.dump_conversation_history()
         data=read_from_file('data.json')
         cur=int(data['curuse'])
         model=str(data['model'])
-        if model!="text-chat-davinci-002-20230126":    
+        if model=="text-davinci-003":    
             await interaction.followup.send("You use `%d` Tokens this time"%cur)
         else:
             # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
@@ -166,19 +198,24 @@ def run_discord_bot():
         await send_start_prompt(client)
     
     @client.tree.command(name="dbug", description="debug only (need permission)")
-    async def chat(interaction: discord.Interaction):
+    async def chat(interaction: discord.Interaction,*,fun:str,id:str):
         if int(interaction.user.id) == int(config['discord_admin']):
-            responses.chatbot.save_conversation(str(interaction.user.id))
-            print(responses.chatbot.get_conversations())
-            responses.chatbot.dump_conversation_history()
+            # responses.chatbot.save_conversation(str(interaction.user.id))
+            # print(responses.chatbot.get_conversations())
+            # responses.chatbot.dump_conversation_history()
             await interaction.response.defer(ephemeral=True)
-            a=responses.chatbot.prompt.chat_history
-            try:
-                print(a)
-            except:
-                print("error")
-                pass
-            await interaction.followup.send(a)
+            # a=responses.chatbot.prompt.chat_history
+            # try:
+            #     print(a)
+            # except:
+            #     print("error")
+            #     pass
+            if fun==0:
+                responses.chatbot.load_conversation(str(id))
+            else:
+                responses.chatbot.save_conversation(str(id))
+            await interaction.followup.send("Finish")
+            print("current: %s"%responses.chatbot.prompt.chat_history)
             return
         else:
             return

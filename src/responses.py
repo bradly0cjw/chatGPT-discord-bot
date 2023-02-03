@@ -31,7 +31,7 @@ def write(token,model):
         use=0
         write_to_file('usage',use,'data.json')
     write_to_file('model',str(model),'data.json')
-    if model!="text-chat-davinci-002-20230126":  
+    if model=="text-davinci-003":  
         use=int(use)+int(token)
     write_to_file('usage',use,'data.json')
 

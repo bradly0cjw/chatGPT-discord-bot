@@ -157,9 +157,9 @@ def run_discord_bot():
         
         # print("current: %s"%responses.chatbot.prompt.chat_history)
 
-        # await send_message(interaction, user_message)
-        await interaction.response.defer(ephemeral=True)
-        await interaction.followup.send("現在Chat Gpt 的Api被肏爛了\n請等待修復")
+        await send_message(interaction, user_message)
+        # await interaction.response.defer(ephemeral=True)
+        # await interaction.followup.send("現在Chat Gpt 的Api被肏爛了\n請等待修復")
 
         # responses.chatbot.save_conversation(str(interaction.user.id))
         # a=responses.chatbot.prompt.chat_history

@@ -1,8 +1,5 @@
-from revChatGPT.Official import Chatbot,Prompt
+from revChatGPT.Official import AsyncChatbot
 import json
-from asgiref.sync import sync_to_async
-import requests
-
 
 def get_config() -> dict:
     import os
@@ -18,7 +15,7 @@ def get_config() -> dict:
 
 
 config = get_config()
-chatbot = Chatbot(api_key=config['openAI_key'])
+chatbot = AsyncChatbot(api_key=config['openAI_key'])
 
 def write(token,model):
     from .bot import write_to_file,read_from_file
@@ -36,7 +33,7 @@ def write(token,model):
     write_to_file('usage',use,'data.json')
 
 async def handle_response(message) -> str:
-    response = await sync_to_async(chatbot.ask)(message)
+    response = await chatbot.ask(message)
     responseMessage = response["choices"][0]["text"]
     nowusage=response["usage"]["total_tokens"]
     model=response["model"]

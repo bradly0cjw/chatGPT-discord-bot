@@ -1,8 +1,6 @@
-# chatGPT-discord-bot
+# ChatGPT Discord Bot
 
-> ### This is a project that provides you to build your own Discord bot using ChatGPT
->
-> ⭐️ If this repo helps you, a star is the biggest support for me and also helps you stay up-to-date 
+> ### Build your own Discord bot using ChatGPT
 ---
 > **Warning**
 > 
@@ -15,7 +13,8 @@
 * `/chat [message]` Chat with ChatGPT!
 * `/private` ChatGPT switch to private mode
 * `/public`  ChatGPT switch to public  mode
-* `/reset` ChatGPT conversation history will be erased
+* `/replyall`  ChatGPT switch between replyall mode and default mode
+* `/reset` Clear ChatGPT conversation history
 
 ### Chat
 
@@ -26,16 +25,22 @@
 * `public mode (default)`  the bot directly reply on the channel
 
   ![image](https://user-images.githubusercontent.com/89479282/206565977-d7c5d405-fdb4-4202-bbdd-715b7c8e8415.gif)
-* `private mode` the bot's reply can only be seen by who use the command
+
+* `private mode` the bot's reply can only be seen by the person who used the command
 
   ![image](https://user-images.githubusercontent.com/89479282/206565873-b181e600-e793-4a94-a978-47f806b986da.gif)
+
+* `replyall mode` the bot will reply to all messages in the server without using slash commands
+
+   > **Warning**
+   > The bot will easily be triggered in `replyall` mode, which could cause program failures
 
 # Setup
 
 ## Install
 
 1. `pip install -r requirements.txt`
-2. **Change the file name of `config.dev.json` to `config.json`**
+2. **Rename the file `config.dev.json` to `config.json`**
 
 ## Step 1: Create a Discord bot
 
@@ -56,7 +61,7 @@
 
    ![image](https://user-images.githubusercontent.com/89479282/205949600-0c7ddb40-7e82-47a0-b59a-b089f929d177.png)
 
-## Step 2: Geanerate a OpenAI API key
+## Step 2: Generate a OpenAI API key
 
 1. Go to https://beta.openai.com/account/api-keys
 
@@ -71,9 +76,9 @@
 2. Navigate to the directory where you installed the ChatGPT Discord bot
 3. Run `python3 main.py` to start the bot
 
-## Step 3: Run the bot with docker
+## Step 3: Run the bot with Docker
 
-1. Build the Dcoker image & Run the Docker container `docker compose up -d`
+1. Build the Docker image & Run the Docker container `docker compose up -d`
 2. Inspect whether the bot works well `docker logs -t chatgpt-discord-bot`
 
    ### Stop the bot:
@@ -81,7 +86,7 @@
    * `docker ps` to see the list of running services
    * `docker stop <BOT CONTAINER ID>` to stop the running bot
 
-### Have A Good Chat !
+### Have a good chat!
 
 ## Optional: Setup starting prompt
 

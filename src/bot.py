@@ -10,20 +10,27 @@ logger = log.setup_logger(__name__)
 config = responses.get_config()
 
 isPrivate = False
-
+isReplyAll = False
 
 class aclient(discord.Client):
     def __init__(self) -> None:
-        super().__init__(intents=discord.Intents.default())
+        intents = discord.Intents.default()
+        intents.message_content = True
+        super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
         self.activity = discord.Activity(type=discord.ActivityType.watching, name="/chat | /help")
 
 
 async def send_message(message, user_message):
-    await message.response.defer(ephemeral=isPrivate)
+    global isReplyAll
+    if not isReplyAll:
+        author = message.user.id
+        await message.response.defer(ephemeral=isPrivate)
+    else:
+        author = message.author.id
     try:
         response = '> **' + user_message + '** - <@' + \
-            str(message.user.id) + '> \n\n'
+            str(author) + '> \n\n'
         response = f"{response}{await responses.handle_response(user_message)}"
         if len(response) > 1900:
             # Split the response into smaller chunks of no more than 1900 characters each(Discord limit is 2000 per chunk)
@@ -31,7 +38,10 @@ async def send_message(message, user_message):
                 # Split the response if the code block exists
                 parts = response.split("```")
                 # Send the first message
-                await message.followup.send(parts[0])
+                if isReplyAll:
+                    await message.channel.send(parts[0])
+                else:
+                    await message.followup.send(parts[0])
                 # Send the code block in a seperate message
                 code_block = parts[1].split("\n")
                 formatted_code_block = ""
@@ -47,23 +57,41 @@ async def send_message(message, user_message):
                     code_block_chunks = [formatted_code_block[i:i+1900]
                                          for i in range(0, len(formatted_code_block), 1900)]
                     for chunk in code_block_chunks:
-                        await message.followup.send("```" + chunk + "```")
+                        if isReplyAll:
+                            await message.channel.send("```" + chunk + "```")
+                        else:
+                            await message.followup.send("```" + chunk + "```")
                 else:
-                    await message.followup.send("```" + formatted_code_block + "```")
-
+                    if isReplyAll:
+                        await message.channel.send("```" + formatted_code_block + "```")
+                    else:
+                        await message.followup.send("```" + formatted_code_block + "```")
                 # Send the remaining of the response in another message
 
                 if len(parts) >= 3:
-                    await message.followup.send(parts[2])
+                    if isReplyAll:
+                        await message.channel.send(parts[2])
+                    else:
+                        await message.followup.send(parts[2])
             else:
                 response_chunks = [response[i:i+1900]
                                    for i in range(0, len(response), 1900)]
                 for chunk in response_chunks:
-                    await message.followup.send(chunk)
+                    if isReplyAll:
+                        await message.channel.send(chunk)
+                    else:
+                        await message.followup.send(chunk)
+                        
         else:
-            await message.followup.send(response)
+            if isReplyAll:
+                await message.channel.send(response)
+            else:
+                await message.followup.send(response)
     except Exception as e:
-        await message.followup.send("> **Error: Something went wrong, please try again later!**")
+        if isReplyAll:
+            await message.channel.send("> **Error: Something went wrong, please try again later!**")
+        else:
+            await message.followup.send("> **Error: Something went wrong, please try again later!**")
         logger.exception(f"Error while sending message: {e}")
 
 def write_to_file(key, value,file_name):
@@ -134,6 +162,12 @@ def run_discord_bot():
 
     @client.tree.command(name="chat", description="Have a chat with ChatGPT (With OpenAi Preset prompt)")
     async def chat(interaction: discord.Interaction, *, message: str):
+        global isReplyAll
+        if isReplyAll:
+            await interaction.response.defer(ephemeral=False)
+            await interaction.followup.send("> **Warn: You already on replyAll mode. If you want to use slash command, switch to normal mode, use `/replyall` again**")
+            logger.warning("\x1b[31mYou already on replyAll mode, can't use slash command!\x1b[0m")
+            return
         if interaction.user == client.user:
             return
         username = str(interaction.user)
@@ -185,7 +219,18 @@ def run_discord_bot():
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
 
-    
+    @client.tree.command(name="replyall", description="Toggle replyAll access")
+    async def replyall(interaction: discord.Interaction):
+        global isReplyAll
+        await interaction.response.defer(ephemeral=False)
+        if isReplyAll:
+            await interaction.followup.send("> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
+            logger.warning("\x1b[31mSwitch to normal mode\x1b[0m")
+        else:
+            await interaction.followup.send("> **Info: Next, the bot will response to all message in the server. If you want to switch back to normal mode, use `/replyAll` again.**")
+            logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
+        isReplyAll = not isReplyAll
+            
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
     async def reset(interaction: discord.Interaction):
         responses.chatbot.reset()
@@ -301,11 +346,23 @@ def run_discord_bot():
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=False)
+        await interaction.followup.send(":star:**BASIC COMMANDS** \n\n    - `/chat [message]` Chat with ChatGPT!\n    - `/public` ChatGPT switch to public mode \n    - `/replyall`  ChatGPT switch between replyall mode and default mode\n    - `/reset` Clear ChatGPT conversation history\n\nFor complete documentation, please visit https://github.com/Zero6992/chatGPT-discord-bot")
         await interaction.followup.send("This Bot is hosted by Bradly<@494796055439867905> \n    :star:**BASIC COMMANDS** \n    `/chat [message]` Chat with ChatGPT!\n    For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot \n    Special Thanks: Zero6992")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send("> `%s`\n> %s Help\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
+    @client.event
+    async def on_message(message):
+        if isReplyAll:
+            if message.author == client.user:
+                return
+            username = str(message.author)
+            user_message = str(message.content)
+            channel = str(message.channel)
+            logger.info(f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
+            await send_message(message, user_message)
+            
     TOKEN = config['discord_bot_token']
     client.run(TOKEN)

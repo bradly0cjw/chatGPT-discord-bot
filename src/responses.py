@@ -1,16 +1,24 @@
-# from revChatGPT.Official import Chatbot,Prompt
-# from ...ChatGPT.src.revChatGPT.Official import Chatbot,Prompt,Conversation,AsyncChatbot
-from revChatGPT.Official import Chatbot,Prompt,Conversation,AsyncChatbot
+from revChatGPT.Official import Chatbot,Prompt
+import json
 from asgiref.sync import sync_to_async
-from dotenv import load_dotenv
-import os
+import requests
 
 
-load_dotenv()
-openAI_key = os.getenv("OPENAI_KEY")
-openAI_model = os.getenv("ENGINE")
-print(openAI_model)
-chatbot = Chatbot(api_key=openAI_key, engine=openAI_model)
+def get_config() -> dict:
+    import os
+    # get config.json path
+    config_dir = os.path.abspath(__file__ + "/../../")
+    config_name = 'config.json'
+    config_path = os.path.join(config_dir, config_name)
+
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+
+    return config
+
+
+config = get_config()
+chatbot = Chatbot(api_key=config['openAI_key'])
 
 def write(token,model):
     from .bot import write_to_file,read_from_file
@@ -27,12 +35,10 @@ def write(token,model):
         use=int(use)+int(token)
     write_to_file('usage',use,'data.json')
 
-async def handle_response(message,userid) -> str:
-    model=openAI_model
-    write(str(0),str(model))
-    response = await sync_to_async(chatbot.ask)(message,conversation_id=userid)
-    print(response)
+async def handle_response(message) -> str:
+    response = await sync_to_async(chatbot.ask)(message)
     responseMessage = response["choices"][0]["text"]
     nowusage=response["usage"]["total_tokens"]
+    model=response["model"]
     write(str(nowusage),str(model))
     return responseMessage

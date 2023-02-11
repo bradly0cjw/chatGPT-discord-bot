@@ -19,12 +19,12 @@ class aclient(discord.Client):
         self.activity = discord.Activity(type=discord.ActivityType.watching, name="/chat | /help")
 
 
-async def send_message(message, user_message):
+async def send_message(message, user_message,userid):
     await message.response.defer(ephemeral=isPrivate)
     try:
         response = '> **' + user_message + '** - <@' + \
             str(message.user.id) + '> \n\n'
-        response = f"{response}{await responses.handle_response(user_message)}"
+        response = f"{response}{await responses.handle_response(user_message,userid)}"
         if len(response) > 1900:
             # Split the response into smaller chunks of no more than 1900 characters each(Discord limit is 2000 per chunk)
             if "```" in response:
@@ -157,7 +157,7 @@ def run_discord_bot():
         
         # print("current: %s"%responses.chatbot.prompt.chat_history)
 
-        await send_message(interaction, user_message)
+        await send_message(interaction, user_message,interaction.user.id)
         # await interaction.response.defer(ephemeral=True)
         # await interaction.followup.send("現在Chat Gpt 的Api被肏爛了\n請等待修復")
 
@@ -210,10 +210,22 @@ def run_discord_bot():
             # except:
             #     print("error")
             #     pass
-            if fun==0:
+            if fun=="l":
                 responses.chatbot.load_conversation(str(id))
-            else:
+                print("l")
+            elif fun=="s":
                 responses.chatbot.save_conversation(str(id))
+                print("s")
+            elif fun=="sf":
+                responses.chatbot.conversations.save(str(id))
+                print("sf")
+            elif fun=="lf":
+                responses.chatbot.conversations.load(str(id))
+                print("lf")
+            elif fun=="hi":
+                pass
+            else:
+                return
             await interaction.followup.send("Finish")
             print("current: %s"%responses.chatbot.prompt.chat_history)
             return

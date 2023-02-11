@@ -1,4 +1,5 @@
-from revChatGPT.Official import Chatbot,Prompt
+# from revChatGPT.Official import Chatbot,Prompt
+from ...ChatGPT.src.revChatGPT.Official import Chatbot ,Prompt,Conversation
 import json
 from asgiref.sync import sync_to_async
 import requests
@@ -35,8 +36,8 @@ def write(token,model):
         use=int(use)+int(token)
     write_to_file('usage',use,'data.json')
 
-async def handle_response(message) -> str:
-    response = await sync_to_async(chatbot.ask)(message)
+async def handle_response(message,userid) -> str:
+    response = await sync_to_async(chatbot.ask)(message,conversation_id=userid)
     responseMessage = response["choices"][0]["text"]
     nowusage=response["usage"]["total_tokens"]
     model=response["model"]

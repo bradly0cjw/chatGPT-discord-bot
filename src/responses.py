@@ -1,21 +1,11 @@
 from revChatGPT.Official import AsyncChatbot
-import json
+from dotenv import load_dotenv
+import os
 
-def get_config() -> dict:
-    import os
-    # get config.json path
-    config_dir = os.path.abspath(__file__ + "/../../")
-    config_name = 'config.json'
-    config_path = os.path.join(config_dir, config_name)
-
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-
-    return config
-
-
-config = get_config()
-chatbot = AsyncChatbot(api_key=config['openAI_key'])
+load_dotenv()
+openAI_key = os.getenv("OPENAI_KEY")
+openAI_model = os.getenv("ENGINE")
+chatbot = AsyncChatbot(api_key=openAI_key, engine=openAI_model)
 
 def write(token,model):
     from .bot import write_to_file,read_from_file

@@ -1,4 +1,5 @@
 import discord
+import os
 from discord import app_commands
 from src import responses
 from src import log
@@ -6,8 +7,6 @@ from datetime import datetime
 import json
 
 logger = log.setup_logger(__name__)
-
-config = responses.get_config()
 
 isPrivate = False
 isReplyAll = False
@@ -126,20 +125,20 @@ async def startup(client):
 
 
 async def send_start_prompt(client):
-    import os
     import os.path
 
     config_dir = os.path.abspath(__file__ + "/../../")
     prompt_name = 'starting-prompt.txt'
     prompt_path = os.path.join(config_dir, prompt_name)
+    discord_channel_id = os.getenv("DISCORD_CHANNEL_ID")
     try:
         if os.path.isfile(prompt_path) and os.path.getsize(prompt_path) > 0:
             with open(prompt_path, "r") as f:
                 prompt = f.read()
-                if (config['discord_channel_id']):
+                if (discord_channel_id):
                     logger.info(f"Send starting prompt with size {len(prompt)}")
                     responseMessage = await responses.handle_response(prompt)
-                    channel = client.get_channel(int(config['discord_channel_id']))
+                    channel = client.get_channel(int(discord_channel_id))
                     await channel.send(responseMessage)
                     logger.info(f"Starting prompt response:{responseMessage}")
                 else:
@@ -363,6 +362,7 @@ def run_discord_bot():
             channel = str(message.channel)
             logger.info(f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
             await send_message(message, user_message)
-            
-    TOKEN = config['discord_bot_token']
+    
+    TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+
     client.run(TOKEN)

@@ -1,11 +1,13 @@
-# chatGPT-discord-bot
+# ChatGPT Discord Bot
 
-> ### This is a project that provides you to build your own Discord bot using ChatGPT
->
-> ⭐️ If this repo helps you, a star is the biggest support for me and also helps you stay up-to-date 
+> ### Build your own Discord bot using ChatGPT
 ---
 > **Warning**
-> 
+>
+> #### 2023-02-10 Update: ChatGPT model but requires payment
+> #### 2023-02-09 Update: Temporarily using the GPT-3 model
+> (Requires payment, please be aware)
+> #### 2023-02-08 Update: ChatGPT API is highly unstable now
 > #### 2023-02-03 Update: ChatGPT API working again
 > #### 2023-02-02 Update: OpenAI has closed ChatGPT API, temporarily switching to using GPT-3 model
 > #### 2023-02-01 Update: Now using the official ChatGPT API
@@ -15,7 +17,8 @@
 * `/chat [message]` Chat with ChatGPT!
 * `/private` ChatGPT switch to private mode
 * `/public`  ChatGPT switch to public  mode
-* `/reset` ChatGPT conversation history will be erased
+* `/replyall`  ChatGPT switch between replyall mode and default mode
+* `/reset` Clear ChatGPT conversation history
 
 ### Chat
 
@@ -26,16 +29,22 @@
 * `public mode (default)`  the bot directly reply on the channel
 
   ![image](https://user-images.githubusercontent.com/89479282/206565977-d7c5d405-fdb4-4202-bbdd-715b7c8e8415.gif)
-* `private mode` the bot's reply can only be seen by who use the command
+
+* `private mode` the bot's reply can only be seen by the person who used the command
 
   ![image](https://user-images.githubusercontent.com/89479282/206565873-b181e600-e793-4a94-a978-47f806b986da.gif)
+
+* `replyall mode` the bot will reply to all messages in the server without using slash commands
+
+   > **Warning**
+   > The bot will easily be triggered in `replyall` mode, which could cause program failures
 
 # Setup
 
 ## Install
 
 1. `pip install -r requirements.txt`
-2. **Change the file name of `config.dev.json` to `config.json`**
+2. **Rename the file `.env.dev` to `.env`**
 
 ## Step 1: Create a Discord bot
 
@@ -44,9 +53,9 @@
 3. Get the token from bot setting
 
    ![image](https://user-images.githubusercontent.com/89479282/205949161-4b508c6d-19a7-49b6-b8ed-7525ddbef430.png)
-4. Store the token to `config.json` under the `discord_bot_token`
+4. Store the token to `.env` under the `DISCORD_BOT_TOKEN`
 
-   ![image](https://user-images.githubusercontent.com/89479282/207357762-94234aa7-aa55-4504-8dfd-9c68ae23a826.png)
+   ![image](https://user-images.githubusercontent.com/89479282/217743218-26e3d999-44d5-4a0b-88e1-ee23f3ffd5d8.png)
    
 5. Turn MESSAGE CONTENT INTENT `ON`
 
@@ -56,7 +65,7 @@
 
    ![image](https://user-images.githubusercontent.com/89479282/205949600-0c7ddb40-7e82-47a0-b59a-b089f929d177.png)
 
-## Step 2: Geanerate a OpenAI API key
+## Step 2: Generate a OpenAI API key
 
 1. Go to https://beta.openai.com/account/api-keys
 
@@ -64,16 +73,16 @@
 
    ![image](https://user-images.githubusercontent.com/89479282/207970699-2e0cb671-8636-4e27-b1f3-b75d6db9b57e.PNG)
 
-2. Store the SECRET KEY to `config.json` under the `openAI_key`
+2. Store the SECRET KEY to `.env` under the `OPENAI_KEY`
 
 ## Step 3: Run the bot on the desktop
 1. Open a terminal or command prompt
 2. Navigate to the directory where you installed the ChatGPT Discord bot
 3. Run `python3 main.py` to start the bot
 
-## Step 3: Run the bot with docker
+## Step 3: Run the bot with Docker
 
-1. Build the Dcoker image & Run the Docker container `docker compose up -d`
+1. Build the Docker image & Run the Docker container `docker compose up -d`
 2. Inspect whether the bot works well `docker logs -t chatgpt-discord-bot`
 
    ### Stop the bot:
@@ -81,7 +90,7 @@
    * `docker ps` to see the list of running services
    * `docker stop <BOT CONTAINER ID>` to stop the running bot
 
-### Have A Good Chat !
+### Have a good chat!
 
 ## Optional: Setup starting prompt
 
@@ -94,4 +103,4 @@
    
         ![channel-id](https://user-images.githubusercontent.com/89479282/207697217-e03357b3-3b3d-44d0-b880-163217ed4a49.PNG)
     
-   2. paste it into `config.json` under `discord_channel_id `
+   2. paste it into `.env` under `DISCORD_CHANNEL_ID`

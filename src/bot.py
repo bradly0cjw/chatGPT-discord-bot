@@ -184,53 +184,7 @@ def run_discord_bot():
         #     print("get %s ,%s"%(interaction.user.id,a))
         #     print("get %s ,%s"%("Yee",c))
         #     print("get %s ,%s"%("lin",b))
-
-    @client.tree.command(name="private", description="Toggle private access")
-    async def private(interaction: discord.Interaction):
-        global isPrivate
-        await interaction.response.defer(ephemeral=False)
-        if not isPrivate:
-            isPrivate = not isPrivate
-            logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
-            await interaction.followup.send(
-                "> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
-        else:
-            logger.info("You already on private mode!")
-            await interaction.followup.send(
-                "> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
-
-    @client.tree.command(name="public", description="Toggle public access")
-    async def public(interaction: discord.Interaction):
-        global isPrivate
-        await interaction.response.defer(ephemeral=False)
-        if isPrivate:
-            isPrivate = not isPrivate
-            await interaction.followup.send(
-                "> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
-            logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
-        else:
-            await interaction.followup.send(
-                "> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
-            logger.info("You already on public mode!")
-
-    @client.tree.command(name="replyall", description="Toggle replyAll access")
-    async def replyall(interaction: discord.Interaction):
-        global isReplyAll
-        await interaction.response.defer(ephemeral=False)
-        if isReplyAll:
-            await interaction.followup.send(
-                "> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
-            logger.warning("\x1b[31mSwitch to normal mode\x1b[0m")
-        else:
-            await interaction.followup.send(
-                "> **Info: Next, the bot will response to all message in the server. If you want to switch back to normal mode, use `/replyAll` again.**")
-            logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
-        isReplyAll = not isReplyAll
-    
-    @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
-    async def reset(interaction: discord.Interaction):
-        responses.chatbot.reset_chat()
-        # except:
+                # except:
         #     # responses.chatbot.prompt.chat_history=[]
         #     print("err")
         #     pass
@@ -265,16 +219,70 @@ def run_discord_bot():
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
 
+
+    @client.tree.command(name="private", description="Toggle private access (Need Permission)")
+    async def private(interaction: discord.Interaction):
+        global isPrivate
+        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
+            await interaction.response.defer(ephemeral=False)
+            if not isPrivate:
+                isPrivate = not isPrivate
+                logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
+                logger.warning(interaction.user.id)
+                await interaction.followup.send(
+                    "> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
+            else:
+                logger.info("You already on private mode!")
+                await interaction.followup.send(
+                    "> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
+        else:
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
+
+    @client.tree.command(name="public", description="Toggle public access (Need Permission)")
+    async def public(interaction: discord.Interaction):
+        global isPrivate
+        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
+            await interaction.response.defer(ephemeral=False)
+            if isPrivate:
+                isPrivate = not isPrivate
+                await interaction.followup.send(
+                    "> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
+                logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
+                logger.warning(interaction.user.id)
+            else:
+                await interaction.followup.send(
+                    "> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
+                logger.info("You already on public mode!")
+        else:
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
+
+
     @client.tree.command(name="replyall", description="Toggle replyAll access")
     async def replyall(interaction: discord.Interaction):
         if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
             global isReplyAll
             await interaction.response.defer(ephemeral=False)
             if isReplyAll:
-                await interaction.followup.send("> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
+                await interaction.followup.send(
+                    "> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
                 logger.warning("\x1b[31mSwitch to normal mode\x1b[0m")
             else:
-                await interaction.followup.send("> **Info: Next, the bot will response to all message in the server. If you want to switch back to normal mode, use `/replyAll` again.**")
+                await interaction.followup.send(
+                    "> **Info: Next, the bot will response to all message in the server. If you want to switch back to normal mode, use `/replyAll` again.**")
                 logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
             isReplyAll = not isReplyAll
         else:
@@ -286,6 +294,12 @@ def run_discord_bot():
             await interaction.followup.send("> **Warn: You don't have Permission ! **")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send("> `%s`\n> %s Reply All\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
+
+    
+    # @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
+    # async def reset(interaction: discord.Interaction):
+    #     responses.chatbot.reset_chat()
+
 
             
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
@@ -350,51 +364,6 @@ def run_discord_bot():
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send("> `%s`\n> %s Usage\n> @`%s#%s`\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)\n"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
 
-    @client.tree.command(name="private", description="Toggle private access (Need Permission)")
-    async def private(interaction: discord.Interaction):
-        global isPrivate
-        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
-            await interaction.response.defer(ephemeral=False)
-            if not isPrivate:
-                isPrivate = not isPrivate
-                logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
-                logger.warning(interaction.user.id)
-                await interaction.followup.send("> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
-            else:
-                logger.info("You already on private mode!")
-                await interaction.followup.send("> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
-        else:
-            await interaction.response.defer(ephemeral=False)
-            username = str(interaction.user)
-            channel = str(interaction.channel)
-            logger.warning(
-            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
-            await interaction.followup.send("> **Warn: You don't have Permission ! **")
-        username,guild,sendchannel,channel,time_string=logging(client,interaction)
-        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
-
-    @client.tree.command(name="public", description="Toggle public access (Need Permission)")
-    async def public(interaction: discord.Interaction):
-        global isPrivate
-        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
-            await interaction.response.defer(ephemeral=False)
-            if isPrivate:
-                isPrivate = not isPrivate
-                await interaction.followup.send("> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
-                logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
-                logger.warning(interaction.user.id)
-            else:
-                await interaction.followup.send("> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
-                logger.info("You already on public mode!")
-        else:
-            await interaction.response.defer(ephemeral=False)
-            username = str(interaction.user)
-            channel = str(interaction.channel)
-            logger.warning(
-            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
-            await interaction.followup.send("> **Warn: You don't have Permission ! **")
-        username,guild,sendchannel,channel,time_string=logging(client,interaction)
-        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
     @client.tree.command(name="sta",description="Show bot staus")
     async def sta(interaction: discord.Interaction):
@@ -421,7 +390,7 @@ def run_discord_bot():
         - `/public` ChatGPT switch to public mode 
         - `/replyall` ChatGPT switch between replyall mode and default mode
         - `/reset` Clear ChatGPT conversation history\n
-        For complete documentation, please visit https://github.com/Zero6992/chatGPT-discord-bot""")
+        For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot""")
         logger.info(
             "\x1b[31mSomeone need help!\x1b[0m")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)

@@ -1,3 +1,4 @@
+from revChatGPT.V1 import AsyncChatbot
 # from revChatGPT.Official import Chatbot,Prompt
 # from ...ChatGPT.src.revChatGPT.Official import Chatbot,Prompt,Conversation,AsyncChatbot
 from revChatGPT.Official import Chatbot,Prompt,Conversation,AsyncChatbot
@@ -7,6 +8,14 @@ import os
 
 
 load_dotenv()
+openAI_email = os.getenv("OPENAI_EMAIL")
+openAI_password = os.getenv("OPENAI_PASSWORD")
+session_token = os.getenv("SESSION_TOKEN")
+chatbot = AsyncChatbot(config={"email":openAI_email, "password":openAI_password, "session_token":session_token})
+
+async def handle_response(message) -> str:
+    async for response in chatbot.ask(message):
+        responseMessage = response["message"]
 openAI_key = os.getenv("OPENAI_KEY")
 openAI_model = os.getenv("ENGINE")
 print(openAI_model)

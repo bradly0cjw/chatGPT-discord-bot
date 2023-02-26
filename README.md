@@ -4,13 +4,8 @@
 ---
 > **Warning**
 >
-> #### 2023-02-10 Update: ChatGPT model but requires payment
-> #### 2023-02-09 Update: Temporarily using the GPT-3 model
-> (Requires payment, please be aware)
+> #### 2023-02-25 Update: Free ChatGPT model
 > #### 2023-02-08 Update: ChatGPT API is highly unstable now
-> #### 2023-02-03 Update: ChatGPT API working again
-> #### 2023-02-02 Update: OpenAI has closed ChatGPT API, temporarily switching to using GPT-3 model
-> #### 2023-02-01 Update: Now using the official ChatGPT API
 
 ## Features
 
@@ -41,9 +36,10 @@
 
 # Setup
 
-## Install
+## Critical prerequisites to install
 
-1. `pip install -r requirements.txt`
+1. run `pip install -r requirements.txt`
+
 2. **Rename the file `.env.dev` to `.env`**
 
 ## Step 1: Create a Discord bot
@@ -55,34 +51,52 @@
    ![image](https://user-images.githubusercontent.com/89479282/205949161-4b508c6d-19a7-49b6-b8ed-7525ddbef430.png)
 4. Store the token to `.env` under the `DISCORD_BOT_TOKEN`
 
-   ![image](https://user-images.githubusercontent.com/89479282/217743218-26e3d999-44d5-4a0b-88e1-ee23f3ffd5d8.png)
-   
+   ![image](https://user-images.githubusercontent.com/89479282/221367600-b3676c8a-4f3f-457d-91c4-48ef129eae57.png)
+
 5. Turn MESSAGE CONTENT INTENT `ON`
 
    ![image](https://user-images.githubusercontent.com/89479282/205949323-4354bd7d-9bb9-4f4b-a87e-deb9933a89b5.png)
-   
+
 6. Invite your bot to your server via OAuth2 URL Generator
 
    ![image](https://user-images.githubusercontent.com/89479282/205949600-0c7ddb40-7e82-47a0-b59a-b089f929d177.png)
 
-## Step 2: Generate a OpenAI API key
+## Step 2: ChatGPT(website) authentication - 2 approaches
 
-1. Go to https://beta.openai.com/account/api-keys
+### Email/Password authentication (Not supported for Google/Microsoft accounts)
+1. Create an account on https://chat.openai.com/chat
 
-2. Click Create new secret key
+2. Save your email into `.env` under `OPENAI_EMAIL`
 
-   ![image](https://user-images.githubusercontent.com/89479282/207970699-2e0cb671-8636-4e27-b1f3-b75d6db9b57e.PNG)
+3. Save your password into `.env` under `OPENAI_PASSWORD`
 
-2. Store the SECRET KEY to `.env` under the `OPENAI_KEY`
+4. You're all set for Step 3
+
+### Session token authentication
+1. Go to https://chat.openai.com/chat log in
+
+2. Open console with `F12`
+
+2. Open `Application` tab > Cookies
+
+    ![image](https://user-images.githubusercontent.com/36258159/205494773-32ef651a-994d-435a-9f76-a26699935dac.png)
+
+3. Copy the value for `__Secure-next-auth.session-token` from cookies and paste it into `.env` under `SESSION_TOKEN`
+
+4. You're all set for Step 3
 
 ## Step 3: Run the bot on the desktop
+
 1. Open a terminal or command prompt
+
 2. Navigate to the directory where you installed the ChatGPT Discord bot
+
 3. Run `python3 main.py` to start the bot
 
 ## Step 3: Run the bot with Docker
 
 1. Build the Docker image & Run the Docker container `docker compose up -d`
+
 2. Inspect whether the bot works well `docker logs -t chatgpt-discord-bot`
 
    ### Stop the bot:
@@ -91,7 +105,9 @@
    * `docker stop <BOT CONTAINER ID>` to stop the running bot
 
 ### Have a good chat!
+## Optional: Disable logging
 
+* Set the value of `LOGGING` in the `.env` to False
 ## Optional: Setup starting prompt
 
 * A starting prompt would be invoked when the bot is first started or reset
@@ -100,7 +116,7 @@
 * Get the first message from ChatGPT in your discord channel!
 
    1. Right-click the channel you want to recieve the message, `Copy  ID`
-   
+
         ![channel-id](https://user-images.githubusercontent.com/89479282/207697217-e03357b3-3b3d-44d0-b880-163217ed4a49.PNG)
-    
+
    2. paste it into `.env` under `DISCORD_CHANNEL_ID`

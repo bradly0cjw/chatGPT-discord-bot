@@ -206,18 +206,24 @@ def run_discord_bot():
         # except:
         #     print("error")
         # responses.chatbot.dump_conversation_history()
-        data=read_from_file('data.json')
-        cur=int(data['curuse'])
-        model=str(data['model'])
-        if model=="text-davinci-003":    
-            await interaction.followup.send("You use `%d` Tokens this time"%cur)
-        else:
-            # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
-            pass
+
+        ## logginfg for usage (Current usage unavailble)
+
+        # data=read_from_file('data.json')
+        # cur=int(data['curuse'])
+        # model=str(data['model'])
+        # if model=="text-davinci-003":    
+        #     await interaction.followup.send("You use `%d` Tokens this time"%cur)
+        # else:
+        #     # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
+        #     pass
+        model="N/A"
+        cur="N/A"
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
-        await channel.send("> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
+        await channel.send(
+            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
 
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")

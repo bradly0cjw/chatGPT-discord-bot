@@ -30,13 +30,16 @@ async def send_message(message, user_message,userid,client):
     try:
         response = '> **' + user_message + '** - <@' + \
             str(author) + '> \n\n'
-        response = f"{response}{await responses.handle_response(user_message)}"
+        chat_model = os.getenv("CHAT_MODEL")
+        if chat_model == "OFFICIAL":
+            response = f"{response}{await responses.official_handle_response(user_message)}"
+        elif chat_model == "UNOFFICIAL":
+            response = f"{response}{await responses.unofficial_handle_response(user_message)}"
         char_limit = 1900
         if len(response) > char_limit:
             # Split the response into smaller chunks of no more than 1900 characters each(Discord limit is 2000 per chunk)
             if "```" in response:
                 # Split the response if the code block exists
-                
                 parts = response.split("```")
 
                 for i in range(0, len(parts)):
@@ -80,7 +83,6 @@ async def send_message(message, user_message,userid,client):
                         await message.channel.send(chunk)
                     else:
                         await message.followup.send(chunk)
-                        
         else:
             if isReplyAll:
                 await message.channel.send(response)
@@ -138,10 +140,15 @@ async def send_start_prompt(client):
                 prompt = f.read()
                 if (discord_channel_id):
                     logger.info(f"Send starting prompt with size {len(prompt)}")
-                    responseMessage = await responses.handle_response(prompt)
+                    chat_model = os.getenv("CHAT_MODEL")
+                    response = ""
+                    if chat_model == "OFFICIAL":
+                        response = f"{response}{await responses.official_handle_response(prompt)}"
+                    elif chat_model == "UNOFFICIAL":
+                        response = f"{response}{await responses.unofficial_handle_response(prompt)}"
                     channel = client.get_channel(int(discord_channel_id))
-                    await channel.send(responseMessage)
-                    logger.info(f"Starting prompt response:{responseMessage}")
+                    await channel.send(response)
+                    logger.info(f"Starting prompt response:{response}")
                 else:
                     logger.info("No Channel selected. Skip sending starting prompt.")
         else:
@@ -292,6 +299,7 @@ def run_discord_bot():
                 logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
             isReplyAll = not isReplyAll
         else:
+
             await interaction.response.defer(ephemeral=False)
             username = str(interaction.user)
             channel = str(interaction.channel)
@@ -306,8 +314,25 @@ def run_discord_bot():
     # async def reset(interaction: discord.Interaction):
     #     responses.chatbot.reset_chat()
 
+           
+    @client.tree.command(name="chat-model", description="Switch different chat model")
+    @app_commands.choices(choices=[
+        app_commands.Choice(name="Official GPT-3.5", value="OFFICIAL"),
+        app_commands.Choice(name="Website ChatGPT", value="UNOFFCIAL")
+    ])
+    async def chat_model(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+        await interaction.response.defer(ephemeral=False)
+        if choices.value == "OFFICIAL":
+            os.environ["CHAT_MODEL"] = "OFFICIAL"
+            await interaction.followup.send(
+                "> **Info: You are now in Official GPT-3.5 model.**\n> You need to set your `OPENAI_API_KEY` in `env` file.")
+            logger.warning("\x1b[31mSwitch to OFFICIAL chat model\x1b[0m")
+        elif choices.value == "UNOFFCIAL":
+            os.environ["CHAT_MODEL"] = "UNOFFICIAL"
+            await interaction.followup.send(
+                "> **Info: You are now in Website ChatGPT model.**\n> You need to set your `SESSION_TOKEN` or `OPENAI_EMAIL` and `OPENAI_PASSWORD` in `env` file.")
+            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) chat model\x1b[0m")
 
-            
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
     async def reset(interaction: discord.Interaction):
         responses.chatbot.reset()
@@ -393,7 +418,7 @@ def run_discord_bot():
         await interaction.response.defer(ephemeral=False)
         await interaction.followup.send(""":star:**BASIC COMMANDS** \n
         - `/chat [message]` Chat with ChatGPT!
-        - `/public` ChatGPT switch to public mode 
+        - `/public` ChatGPT switch to public mode
         - `/replyall` ChatGPT switch between replyall mode and default mode
         - `/reset` Clear ChatGPT conversation history\n
         For complete documentation, please visit https://github.com/bradly0cjw/chatGPT-discord-bot""")
@@ -412,7 +437,7 @@ def run_discord_bot():
             channel = str(message.channel)
             logger.info(f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
             await send_message(message, user_message)
-    
+
     TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
     client.run(TOKEN)

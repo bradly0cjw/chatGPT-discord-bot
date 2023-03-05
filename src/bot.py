@@ -335,8 +335,13 @@ def run_discord_bot():
 
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
     async def reset(interaction: discord.Interaction):
-        responses.chatbot.reset()
-        responses.chatbot.save_conversation(conversation_id=interaction.user.id)
+        chat_model = os.getenv("CHAT_MODEL")
+        if chat_model == "OFFICIAL":
+            responses.offical_chatbot.reset()
+        elif chat_model == "UNOFFICIAL":
+            responses.unofficial_chatbot.reset_chat()
+        # responses.chatbot.reset()
+        # responses.chatbot.save_conversation(conversation_id=interaction.user.id)
         await interaction.response.defer(ephemeral=False)
         await interaction.followup.send("> **Info: I have forgotten everything.**")
         logger.warning(

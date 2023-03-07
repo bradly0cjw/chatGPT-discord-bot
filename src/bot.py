@@ -19,7 +19,7 @@ class aclient(discord.Client):
         self.activity = discord.Activity(type=discord.ActivityType.watching, name="/chat | /help")
 
 
-async def send_message(message, user_message):
+async def send_message(message, user_message,userid,client):
     isReplyAll =  os.getenv("REPLYING_ALL")
     if isReplyAll == "False":
         author = message.user.id
@@ -219,13 +219,13 @@ def run_discord_bot():
         # else:
         #     # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
         #     pass
-        model="N/A"
+        model=os.getenv("CHAT_MODEL")
         cur="N/A"
         logger.info(
             f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send(
-            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%d`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
+            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%s`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
 
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
@@ -281,55 +281,21 @@ def run_discord_bot():
 
     @client.tree.command(name="replyall", description="Toggle replyAll access")
     async def replyall(interaction: discord.Interaction):
-
-        isReplyAll =  os.getenv("REPLYING_ALL")
-        os.environ["REPLYING_ALL_DISCORD_CHANNEL_ID"] = str(interaction.channel_id)
-        await interaction.response.defer(ephemeral=False)
-        if isReplyAll == "True":
-            os.environ["REPLYING_ALL"] = "False"
-            await interaction.followup.send(
-                "> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
-            logger.warning("\x1b[31mSwitch to normal mode\x1b[0m")
-        elif isReplyAll == "False":
-            os.environ["REPLYING_ALL"] = "True"
-            await interaction.followup.send(
-                "> **Info: Next, the bot will response to all message in this channel only.If you want to switch back to normal mode, use `/replyAll` again.**")
-            logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
-        
-
-    @client.tree.command(name="chat-model", description="Switch different chat model")
-    @app_commands.choices(choices=[
-        app_commands.Choice(name="Official GPT-3.5", value="OFFICIAL"),
-        app_commands.Choice(name="Website ChatGPT", value="UNOFFCIAL")
-    ])
-    async def chat_model(interaction: discord.Interaction, choices: app_commands.Choice[str]):
-        await interaction.response.defer(ephemeral=False)
-        if choices.value == "OFFICIAL":
-            os.environ["CHAT_MODEL"] = "OFFICIAL"
-            await interaction.followup.send(
-                "> **Info: You are now in Official GPT-3.5 model.**\n> You need to set your `OPENAI_API_KEY` in `env` file.")
-            logger.warning("\x1b[31mSwitch to OFFICIAL chat model\x1b[0m")
-        elif choices.value == "UNOFFCIAL":
-            os.environ["CHAT_MODEL"] = "UNOFFICIAL"
-            await interaction.followup.send(
-                "> **Info: You are now in Website ChatGPT model.**\n> You need to set your `SESSION_TOKEN` or `OPENAI_EMAIL` and `OPENAI_PASSWORD` in `env` file.")
-            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) chat model\x1b[0m")
-            
-=======
         if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
-            global isReplyAll
+            isReplyAll =  os.getenv("REPLYING_ALL")
+            os.environ["REPLYING_ALL_DISCORD_CHANNEL_ID"] = str(interaction.channel_id)
             await interaction.response.defer(ephemeral=False)
-            if isReplyAll:
+            if isReplyAll == "True":
+                os.environ["REPLYING_ALL"] = "False"
                 await interaction.followup.send(
                     "> **Info: The bot will only response to the slash command `/chat` next. If you want to switch back to replyAll mode, use `/replyAll` again.**")
                 logger.warning("\x1b[31mSwitch to normal mode\x1b[0m")
-            else:
+            elif isReplyAll == "False":
+                os.environ["REPLYING_ALL"] = "True"
                 await interaction.followup.send(
-                    "> **Info: Next, the bot will response to all message in the server. If you want to switch back to normal mode, use `/replyAll` again.**")
+                    "> **Info: Next, the bot will response to all message in this channel only.If you want to switch back to normal mode, use `/replyAll` again.**")
                 logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
-            isReplyAll = not isReplyAll
         else:
-
             await interaction.response.defer(ephemeral=False)
             username = str(interaction.user)
             channel = str(interaction.channel)
@@ -361,7 +327,7 @@ def run_discord_bot():
             os.environ["CHAT_MODEL"] = "UNOFFICIAL"
             await interaction.followup.send(
                 "> **Info: You are now in Website ChatGPT model.**\n> You need to set your `SESSION_TOKEN` or `OPENAI_EMAIL` and `OPENAI_PASSWORD` in `env` file.")
-            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) chat model\x1b[0m")
+            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) chat model\x1b[0m")    
 
 
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
@@ -473,7 +439,7 @@ def run_discord_bot():
             user_message = str(message.content)
             channel = str(message.channel)
             logger.info(f"\x1b[31m{username}\x1b[0m : '{user_message}' ({channel})")
-            await send_message(message, user_message)
+            await send_message(message, user_message,"",client)
 
     TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 

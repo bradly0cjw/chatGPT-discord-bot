@@ -3,6 +3,7 @@
 > ### Build your own Discord bot using ChatGPT
 ---
 > **Warning**
+>According to OpenAI's latest announcement, using unofficial API may result in the ban of your account. Please assess the risks yourself
 >
 >According to OpenAI's latest announcement, using unofficial API may result in the ban of your account. Please assess the risks yourself
 >

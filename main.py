@@ -2,6 +2,7 @@ from src import bot
 from dotenv import load_dotenv
 import sys
 
+
 def check_verion() -> None:
     import pkg_resources
     import src.log

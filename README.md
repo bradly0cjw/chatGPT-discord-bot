@@ -5,6 +5,7 @@
 > [**中文說明**](https://zero6992.github.io/posts/chatgpt-discord-bot-chinese/)
 ---
 > **Warning**
+>According to OpenAI's latest announcement, using unofficial API may result in the ban of your account. Please assess the risks yourself
 >
 >According to OpenAI's latest announcement, using unofficial API may result in the ban of your account. Please assess the risks yourself
 >

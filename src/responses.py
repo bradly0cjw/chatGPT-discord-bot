@@ -1,9 +1,10 @@
+import os
 from revChatGPT.V1 import AsyncChatbot
 from revChatGPT.V3 import Chatbot
 from dotenv import load_dotenv
+from src import personas
 from typing import Union
-
-import os
+from asgiref.sync import sync_to_async
 
 
 load_dotenv()
@@ -14,7 +15,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ENGINE = os.getenv("OPENAI_ENGINE")
 CHAT_MODEL = os.getenv("CHAT_MODEL")
 
-
 def get_chatbot_model(model_name: str) -> Union[AsyncChatbot, Chatbot]:
     if model_name == "UNOFFICIAL":
         openai_email = os.getenv("OPENAI_EMAIL")
@@ -23,19 +23,31 @@ def get_chatbot_model(model_name: str) -> Union[AsyncChatbot, Chatbot]:
         return AsyncChatbot(config={"email": openai_email, "password": openai_password, "session_token": session_token})
     elif model_name == "OFFICIAL":
         openai_api_key = os.getenv("OPENAI_API_KEY")
-        print(openai_api_key)
         engine = os.getenv("OPENAI_ENGINE")
         return Chatbot(api_key=openai_api_key, engine=engine)
 
 chatbot = get_chatbot_model(CHAT_MODEL)
 
 async def official_handle_response(message) -> str:
-    return chatbot.ask(message)
+    return await sync_to_async(chatbot.ask)(message)
 
 async def unofficial_handle_response(message) -> str:
     async for response in chatbot.ask(message):
         responseMessage = response["message"]
     return responseMessage
+
+# resets conversation and asks chatGPT the prompt for a persona
+async def switch_persona(persona) -> None:
+    CHAT_MODEL = os.getenv("CHAT_MODEL")
+    if CHAT_MODEL ==  "UNOFFICIAL":
+        chatbot.reset_chat()
+        async for response in chatbot.ask(personas.PERSONAS.get(persona)):
+            pass
+
+    elif CHAT_MODEL == "OFFICIAL":
+        chatbot.reset()
+        await sync_to_async(chatbot.ask)(personas.PERSONAS.get(persona))
+
 # openAI_key = os.getenv("OPENAI_KEY")
 # openAI_model = os.getenv("ENGINE")
 # print(openAI_model)

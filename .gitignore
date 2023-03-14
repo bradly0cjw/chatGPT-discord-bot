@@ -1,3 +1,6 @@
+# Generated image files
+images/
+
 config.json
 *usage.txt
 data.json

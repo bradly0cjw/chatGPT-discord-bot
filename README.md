@@ -4,6 +4,7 @@
 >
 ---
 > **Warning**
+>According to OpenAI's latest announcement, using unofficial API may result in the ban of your account. Please assess the risks yourself
 >
 > #### 2023-03-18 GPT-4 is now supported and the dependency packages have been updated. Please reinstall the dependencies once again
 >

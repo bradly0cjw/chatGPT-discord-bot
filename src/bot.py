@@ -50,7 +50,6 @@ async def send_message(message, user_message,userid,client):
                             await message.channel.send(parts[i])
                         else:
                             await message.followup.send(parts[i])
-
                     else: # Odd-numbered parts are code blocks
                         code_block = parts[i].split("\n")
                         formatted_code_block = ""
@@ -74,7 +73,6 @@ async def send_message(message, user_message,userid,client):
                             await message.channel.send(f"```{formatted_code_block}```")
                         else:
                             await message.followup.send(f"```{formatted_code_block}```")
-
             else:
                 response_chunks = [response[i:i+char_limit]
                                    for i in range(0, len(response), char_limit)]
@@ -158,7 +156,6 @@ async def send_start_prompt(client):
 
 def run_discord_bot():
     client = aclient()
-
 
     @client.event
     async def on_ready():
@@ -320,22 +317,41 @@ def run_discord_bot():
     @client.tree.command(name="chat-model", description="Switch different chat model")
     @app_commands.choices(choices=[
         app_commands.Choice(name="Official GPT-3.5", value="OFFICIAL"),
-        app_commands.Choice(name="Website ChatGPT", value="UNOFFICIAL")
+        app_commands.Choice(name="Ofiicial GPT-4.0", value="OFFICIAL-GPT4"),
+        app_commands.Choice(name="Website ChatGPT-3.5", value="UNOFFICIAL"),
+        app_commands.Choice(name="Website ChatGPT-4.0", value="UNOFFICIAL-GPT4"),
     ])
+
     async def chat_model(interaction: discord.Interaction, choices: app_commands.Choice[str]):
         await interaction.response.defer(ephemeral=False)
         if choices.value == "OFFICIAL":
-            responses.chatbot = responses.get_chatbot_model("OFFICIAL")
+            os.environ["GPT_ENGINE"] = "gpt-3.5-turbo"
             os.environ["CHAT_MODEL"] = "OFFICIAL"
+            responses.chatbot = responses.get_chatbot_model("OFFICIAL")
             await interaction.followup.send(
-                "> **Info: You are now in Official GPT-3.5 model.**\n> You need to set your `OPENAI_API_KEY` in `env` file.")
-            logger.warning("\x1b[31mSwitch to OFFICIAL chat model\x1b[0m")
+                "> **Info: You are now in Official GPT-3.5 model.**\n")
+            logger.warning("\x1b[31mSwitch to OFFICIAL GPT-3.5 model\x1b[0m")
+        elif choices.value == "OFFICIAL-GPT4":
+            os.environ["GPT_ENGINE"] = "gpt-4"
+            os.environ["CHAT_MODEL"] = "OFFICIAL"
+            responses.chatbot = responses.get_chatbot_model("OFFICIAL")
+            await interaction.followup.send(
+                "> **Info: You are now in Official GPT-4.0 model.**\n")
+            logger.warning("\x1b[31mSwitch to OFFICIAL GPT-4.0 model\x1b[0m")
         elif choices.value == "UNOFFICIAL":
-            responses.chatbot = responses.get_chatbot_model("UNOFFICIAL")
+            os.environ["GPT_ENGINE"] = "gpt-3.5-turbo"
             os.environ["CHAT_MODEL"] = "UNOFFICIAL"
+            responses.chatbot = responses.get_chatbot_model("UNOFFICIAL")
             await interaction.followup.send(
-                "> **Info: You are now in Website ChatGPT model.**\n> You need to set your `SESSION_TOKEN` or `OPENAI_EMAIL` and `OPENAI_PASSWORD` in `env` file.")
-            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) chat model\x1b[0m")    
+                "> **Info: You are now in Website ChatGPT-3.5 model.**\n")
+            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) GPT-3.5 model\x1b[0m")
+        elif choices.value == "UNOFFICIAL-GPT4":
+            os.environ["GPT_ENGINE"] = "gpt-4"
+            os.environ["CHAT_MODEL"] = "UNOFFICIAL"
+            responses.chatbot = responses.get_chatbot_model("UNOFFICIAL")
+            await interaction.followup.send(
+                "> **Info: You are now in Website ChatGPT-4.0 model.**\n")
+            logger.warning("\x1b[31mSwitch to UNOFFICIAL(Website) GPT-4.0 model\x1b[0m")
 
 
     @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
@@ -468,12 +484,10 @@ def run_discord_bot():
         if interaction.user == client.user:
             return
 
-        #await interaction.response.defer(ephemeral=False)
         username = str(interaction.user)
         channel = str(interaction.channel)
         logger.info(
             f"\x1b[31m{username}\x1b[0m : /draw [{prompt}] in ({channel})")
-
 
         await interaction.response.defer(thinking=True)
         try:
@@ -484,7 +498,6 @@ def run_discord_bot():
             embed = discord.Embed(title=title)
             embed.set_image(url="attachment://image.png")
 
-            # send image in an embed
             await interaction.followup.send(file=file, embed=embed)
 
         except openai.InvalidRequestError:

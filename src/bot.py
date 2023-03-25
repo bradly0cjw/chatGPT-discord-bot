@@ -178,56 +178,15 @@ def run_discord_bot():
             return
         username = str(interaction.user)
         channel = str(interaction.channel)
-        # responses.chatbot.reset()
-        # try:
-        #     # responses.chatbot.prompt.chat_history=[]
-        #     responses.chatbot.load_conversation(str(interaction.user.id))
-        #     a=responses.chatbot.conversations[str(interaction.user.id)].chat_history
-        #     b=responses.chatbot.conversations["849950082714435624"].chat_history
-        #     c=responses.chatbot.conversations["494796055439867905"].chat_history
-        #     print("get %s ,%s"%(interaction.user.id,a))
-        #     print("get %s ,%s"%("Yee",c))
-        #     print("get %s ,%s"%("lin",b))
-                # except:
-        #     # responses.chatbot.prompt.chat_history=[]
-        #     print("err")
-        #     pass
-        
-        # print("current: %s"%responses.chatbot.prompt.chat_history)
 
-        await send_message(interaction, user_message,interaction.user.id,client)
-        # await interaction.response.defer(ephemeral=True)
-        # await interaction.followup.send("現在Chat Gpt 的Api被肏爛了\n請等待修復")
-
-        # responses.chatbot.save_conversation(str(interaction.user.id))
-        # a=responses.chatbot.prompt.chat_history
-        # try:
-        #     print(a)
-        #     b=responses.chatbot.conversations["849950082714435624"].chat_history
-        #     c=responses.chatbot.conversations["494796055439867905"].chat_history
-        #     print("get %s ,%s"%("Yee",c))
-        #     print("get %s ,%s"%("lin",b))
-        # except:
-        #     print("error")
-        # responses.chatbot.dump_conversation_history()
-
-        ## logginfg for usage (Current usage unavailble)
-
-        # data=read_from_file('data.json')
-        # cur=int(data['curuse'])
-        # model=str(data['model'])
-        # if model=="text-davinci-003":    
-        #     await interaction.followup.send("You use `%d` Tokens this time"%cur)
-        # else:
-        #     # await interaction.followup.send("You use `%d` Tokens this time\nBut currently `%s` model is free to use"%(cur,model))
-        #     pass
+        await send_message(interaction, message,interaction.user.id,client)
         model=os.getenv("CHAT_MODEL")
         cur="N/A"
         logger.info(
-            f"\x1b[31m{username}\x1b[0m : '{user_message}' with {model} {cur} ({channel})")
+            f"\x1b[31m{username}\x1b[0m : '{message}' with {model} {cur} ({channel})")
         username,guild,sendchannel,channel,time_string=logging(client,interaction)
         await channel.send(
-            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%s`\n> @`%s#%s`\n"%(time_string,username,user_message,model,cur,guild,sendchannel))
+            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%s`\n> @`%s#%s`\n"%(time_string,username,message,model,cur,guild,sendchannel))
 
 
     @client.tree.command(name="private", description="Toggle private access (Need Permission)")
@@ -309,9 +268,6 @@ def run_discord_bot():
         await channel.send("> `%s`\n> %s Reply All\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
     
-    # @client.tree.command(name="reset", description="Complete reset ChatGPT conversation history")
-    # async def reset(interaction: discord.Interaction):
-    #     responses.chatbot.reset_chat()
 
            
     @client.tree.command(name="chat-model", description="Switch different chat model")

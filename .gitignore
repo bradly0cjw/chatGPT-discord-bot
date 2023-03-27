@@ -2,7 +2,10 @@
 images/
 
 config.json
-
+*usage.txt
+data.json
+test.py
+model.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

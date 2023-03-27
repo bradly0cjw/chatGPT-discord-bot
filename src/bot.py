@@ -11,6 +11,7 @@ logger = log.setup_logger(__name__)
 def run_discord_bot():
     @client.event
     async def on_ready():
+        await client.startup()
         await client.send_start_prompt()
         await client.tree.sync()
         logger.info(f'{client.user} is now running!')
@@ -27,36 +28,66 @@ def run_discord_bot():
             return
         username = str(interaction.user)
         channel = str(interaction.channel)
-        logger.info(
-            f"\x1b[31m{username}\x1b[0m : /chat [{message}] in ({channel})")
+
+        await send_message(interaction, message,interaction.user.id,client)
+        model=os.getenv("CHAT_MODEL")
+        cur="N/A"
         await client.send_message(interaction, message)
+        logger.info(
+            f"\x1b[31m{username}\x1b[0m : '{message}' with {model} {cur} ({channel})")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send(
+            "> `%s`\n> %s\n> **Text:**`%s`\n> **Model:**`%s` **Token:**`%s`\n> @`%s#%s`\n"%(time_string,username,message,model,cur,guild,sendchannel))
 
 
-    @client.tree.command(name="private", description="Toggle private access")
+    @client.tree.command(name="private", description="Toggle private access (Need Permission)")
     async def private(interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=False)
-        if not client.isPrivate:
-            client.isPrivate = not client.isPrivate
-            logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
-            await interaction.followup.send(
+        global isPrivate
+        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
+            await interaction.response.defer(ephemeral=False)
+            if not client.isPrivate:
+                client.isPrivate = not client.isPrivate
+                logger.warning("\x1b[31mSwitch to private mode\x1b[0m")
+                await interaction.followup.send(
                 "> **Info: Next, the response will be sent via private message. If you want to switch back to public mode, use `/public`**")
+            else:
+                logger.info("You already on private mode!")
+                await interaction.followup.send(
+                    "> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
         else:
-            logger.info("You already on private mode!")
-            await interaction.followup.send(
-                "> **Warn: You already on private mode. If you want to switch to public mode, use `/public`**")
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Private\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
 
-    @client.tree.command(name="public", description="Toggle public access")
+    @client.tree.command(name="public", description="Toggle public access (Need Permission)")
     async def public(interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=False)
-        if client.isPrivate:
-            client.isPrivate = not client.isPrivate
-            await interaction.followup.send(
-                "> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
-            logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
+        global isPrivate
+        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
+            await interaction.response.defer(ephemeral=False)
+            if client.isPrivate:
+                client.isPrivate = not client.isPrivate
+                await interaction.followup.send(
+                    "> **Info: Next, the response will be sent to the channel directly. If you want to switch back to private mode, use `/private`**")
+                logger.warning("\x1b[31mSwitch to public mode\x1b[0m")
+            else:
+                await interaction.followup.send(
+                    "> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
+                logger.info("You already on public mode!")
         else:
-            await interaction.followup.send(
-                "> **Warn: You already on public mode. If you want to switch to private mode, use `/private`**")
-            logger.info("You already on public mode!")
+            await interaction.response.defer(ephemeral=False)
+            username = str(interaction.user)
+            channel = str(interaction.channel)
+            logger.warning(
+            f"\x1b[31m{username}\x1b[0m : '{interaction.user.id}' ({channel}) Private")
+            await interaction.followup.send("> **Warn: You don't have Permission ! **")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Public\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
+
 
 
     @client.tree.command(name="replyall", description="Toggle replyAll access")
@@ -74,7 +105,9 @@ def run_discord_bot():
                 "> **Info: Next, the bot will response to all message in this channel only.If you want to switch back to normal mode, use `/replyAll` again.**")
             logger.warning("\x1b[31mSwitch to replyAll mode\x1b[0m")
 
+    
 
+           
     @client.tree.command(name="chat-model", description="Switch different chat model")
     @app_commands.choices(choices=[
         app_commands.Choice(name="Official GPT-3.5", value="OFFICIAL"),
@@ -132,6 +165,78 @@ def run_discord_bot():
         personas.current_persona = "standard"
         logger.warning(
             "\x1b[31mChatGPT bot has been successfully reset\x1b[0m")
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s **Reset**\n> @`%s#%s`\n"%(time_string,username,guild,sendchannel))
+        await send_start_prompt(client)
+    
+    @client.tree.command(name="dbug", description="debug only (need permission)")
+    async def chat(interaction: discord.Interaction,*,fun:str,id:str):
+        if int(interaction.user.id) == int(os.getenv("DISCORD_ADMIN")):
+            # responses.chatbot.save_conversation(str(interaction.user.id))
+            # print(responses.chatbot.get_conversations())
+            # responses.chatbot.dump_conversation_history()
+            await interaction.response.defer(ephemeral=True)
+            # a=responses.chatbot.prompt.chat_history
+            # try:
+            #     print(a)
+            # except:
+            #     print("error")
+            #     pass
+            if fun=="l":
+                responses.chatbot.load_conversation(str(id))
+                print("l")
+            elif fun=="s":
+                responses.chatbot.save_conversation(str(id))
+                print("s")
+            elif fun=="sf":
+                responses.chatbot.conversations.save(str(id))
+                print("sf")
+            elif fun=="lf":
+                responses.chatbot.conversations.load(str(id))
+                print("lf")
+            elif fun=="hi":
+                pass
+            else:
+                return
+            await interaction.followup.send("Finish")
+            print("current: %s"%responses.chatbot.prompt.chat_history)
+            return
+        else:
+            return
+
+    @client.tree.command(name="usage", description="Check current API usage")
+    async def cur_usege(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=False)
+        try:
+            data=read_from_file('data.json')
+            use=int(data['usage'])
+        except:
+            use=0
+            write_to_file('usage',use,'data.json')
+        usepercent=use/900000*100
+        usecredit=use/1000*0.02
+        await interaction.followup.send("**Used Tokens:** `%d/900000` (%.2f%%)\n**Used Credit:** `$%.2f/$18.00` (USD)"%(use,usepercent,usecredit))    
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        await channel.send("> `%s`\n> %s Usage\n> @`%s#%s`\n> **Used Tokens:** `%d/900000` (%.2f%%)\n> **Used Credit:** `$%.2f/$18.00` (USD)\n"%(time_string,username,guild,sendchannel,use,usepercent,usecredit))
+
+
+    @client.tree.command(name="sta",description="Show bot staus")
+    async def sta(interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=False)
+        pre=read_from_file('data.json')
+        pre=datetime.fromisoformat(pre["time"])
+        pingvalue=str(round(client.latency * 1000, 2))
+        username,guild,sendchannel,channel,time_string=logging(client,interaction)
+        now = datetime.now()
+        diff=now-pre
+        days = diff.days/1
+        hours = (diff.seconds/60/60)%24
+        min = (diff.seconds/60)%60
+        sec = diff.seconds%60
+        time_str=("`%d D %02d:%02d:%02d`"%(days,hours,min,sec))
+        await interaction.followup.send("> **Pong!~** `%s` **ms**\n> **Uptime:** %s"%(pingvalue,time_str))
+        await channel.send("> `%s`\n> %s \n> **Ping:**`%s`\n> **Uptime:** %s\n> @`%s#%s`\n"%(time_string,username,pingvalue,time_str,guild,sendchannel))
+
 
     @client.tree.command(name="help", description="Show help for the bot")
     async def help(interaction: discord.Interaction):
